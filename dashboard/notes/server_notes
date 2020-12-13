@@ -1,0 +1,8 @@
+https://github.com/crsandeep/simple-react-full-stack
+
+Great tutorial. When running production, the server.js file is served, loading the react build.
+
+Old scripts.
+
+  "start": "webpack-dev-server --config ./webpack.config.js --mode development",
+  "test": "echo \"No test specified\" && exit 0"

@@ -1,0 +1,56 @@
+
+/*
+
+
+public struct Colors {
+    static let green: UIColor = UIColor(hex: "#39FF14")
+    static let black: UIColor = UIColor(hex: "#121212")
+    static let purple: UIColor = UIColor(hex: "#EC6CFF")
+    static let yellow: UIColor = UIColor(hex: "#ECE300")
+    static let orange: UIColor = UIColor(hex: "#FFCD00")
+    static let blue: UIColor = UIColor(hex: "#00FFFD")
+    static let red: UIColor = UIColor(hex: "#AA1313")
+    static let marbleBrown: UIColor = UIColor(hex: "#786E5D")
+    static let graniteGray: UIColor = UIColor(hex: "#808080")
+
+}
+
+
+*/
+
+
+.soundContainer {
+  position: absolute;
+  z-index: 6;
+  /* display: none; */
+  bottom: -70%;
+  left: -70%;
+  width: 240vw;
+  height: 240vh;
+  transform: rotate(90deg);
+}
+
+.soundContainerLandscape {
+  position: absolute;
+  z-index: 6;
+  /* display: none; */
+  bottom: -70%;
+  left: -70%;
+  width: 240vw;
+  height: 240vh;
+}
+
+.fade-in-sound {
+  animation: fade 2.4s ease-in;
+}
+
+.hide {
+  opacity: 0;
+  display: none;
+}
+
+@keyframes fade {
+  0% {
+    opacity: 0;
+  }
+}

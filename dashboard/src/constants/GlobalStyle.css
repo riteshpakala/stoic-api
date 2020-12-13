@@ -1,0 +1,150 @@
+
+/****
+
+Color system
+
+**/
+
+.stoicOrange {
+    color: #FFCD00;
+}
+
+.stoicPurple {
+    color: #EC6CFF;
+}
+
+.stoicGreen {
+    color: #39FF14;
+}
+
+.stoicBlack {
+    color: #121212;
+}
+
+.stoicMarbleBrown {
+    color: #a19a8e;
+}
+
+.stoicGraniteGray {
+    color: #808080;
+}
+
+.stoicOrangeBG {
+    background-color: #FFCD00;
+}
+
+.stoicPurpleBG {
+    background-color: #EC6CFF;
+}
+
+.stoicGreenBG {
+    background-color: #39FF14;
+}
+
+.stoicBlackBG {
+    background-color: #121212;
+}
+
+.stoicMarbleBrownBG {
+    background-color: #786E5D;
+}
+
+.stoicMarbleBrownGradient {
+    background-image: linear-gradient(75deg, #786E5D 20% , #F5F5F5 240%);
+}
+
+
+.stoicGraniteGrayBG {
+    background-color: #808080;
+}
+
+/****
+
+Fonts
+
+**/
+
+.courierLarge {
+    font-family: 'Courier Prime', monospace;
+    font-size: 28px;
+    text-decoration: none;
+}
+
+.courierSemiLarge {
+    font-family: 'Courier Prime', monospace;
+    font-size: 22px;
+    text-decoration: none;
+}
+
+.courierMedium {
+    font-family: 'Courier Prime', monospace;
+    font-size: 16px;
+    text-decoration: none;
+}
+
+.courierSmall {
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    text-decoration: none;
+}
+
+/****
+
+Margin
+
+**/
+
+.marginLeftPadding {
+    margin-left: 12px;
+}
+
+.marginRightPadding {
+    margin-right: 12px;
+}
+
+/****
+
+Aesthetics
+
+**/
+
+.dropShadow {
+    -webkit-box-shadow: 2px 6px 28px -2px rgba(18,18,18,1);
+    -moz-box-shadow: 2px 6px 28px -2px rgba(18,18,18,1);
+    box-shadow: 2px 6px 28px -2px rgba(18,18,18,1);
+}
+
+.innerShadow {
+    -webkit-box-shadow: inset 2px 6px 27px -5px rgba(18,18,18,1);
+    -moz-box-shadow: inset 2px 6px 27px -5px rgba(18,18,18,1);
+    box-shadow: inset 2px 6px 27px -5px rgba(18,18,18,1);
+}
+
+
+/****
+
+Animation system
+
+**/
+
+.fade-in-model {
+    animation: fade 2.4s ease-in;
+}
+
+.fade-in-copy {
+    animation: fade 2.0s ease-in;
+}
+
+.fade-in-copy-2 {
+    animation: fade 1.6s ease-in;
+}
+
+.fade-in-copy-3 {
+    animation: fade 1.2s ease-in;
+}
+
+@keyframes fade {
+    0% {
+        opacity: 0;
+    }
+}
