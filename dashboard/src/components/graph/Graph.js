@@ -21,22 +21,26 @@ class Graph extends React.Component {
   }
 
   componentWillMount() {
-  }
-
-  componentDidMount() {
-
-    let vw = this.props.width/2;
-    document.documentElement.style.setProperty('--vw', `${vw}px`);
-    document.documentElement.style.setProperty('--vh', `220px`);
-    document.querySelector(".graphContainer").addEventListener( 'mouseup', this.onMouseUp, false );
-
+    let symbols = [this.props.symbol];
     this.setState({
       data: [],
        dataSymbols: [],
         count: 0,
-         siphonSymbols: ["aapl"] });
+         siphonSymbols: symbols });
+  }
+
+  componentDidMount() {
+
+    let vw = (this.props.width/2) - 16;
+    document.documentElement.style.setProperty('--vw', `${vw}px`);
+    document.documentElement.style.setProperty('--vh', `220px`);
+    document.querySelector(".graphContainer").addEventListener( 'mouseup', this.onMouseUp, false );
 
 
+
+    for (const symbol in this.state.siphonSymbols) {
+      this.siphon(this.state.siphonSymbols[symbol]);
+    }
 
   }
 
@@ -44,12 +48,9 @@ class Graph extends React.Component {
   }
 
   onMouseUp(event) {
-       this.siphon(this.state.dataSymbols.length);
   }
 
-  siphon(index) {
-    console.log(this.state.siphonSymbols[index]);
-    let symbol = this.state.siphonSymbols[index];
+  siphon(symbol) {
     if (symbol === "" || !symbol) {
     }else{
       fetch('/api/david/v0.00.00/stock/'+symbol).then(results => {
@@ -59,36 +60,28 @@ class Graph extends React.Component {
       }).then(json => {
           let newData = this.state.data;
           newData.push(json);
-
           let newSymbols = this.state.dataSymbols;
           newSymbols.push(symbol);
           this.setState({data: newData, count: newData.length, dataSymbols: newSymbols});
-          console.log(this.state.siphonSymbols.length);
-          if (this.state.siphonSymbols.length > newSymbols.length) {
-            this.siphon(newSymbols.length);
-          }
       });
     }
   }
 
   render() {
 
-    return (
-    <div className="graphContainer">
-      <GraphEntity
-        data={this.state.count>0 ? this.state.data[0] : {}}
-        symbol={this.state.count>0 ? this.state.dataSymbols[0] : ""}
-        width={this.props.width/2}/>
-      <GraphEntity
-        data={this.state.count>1 ? this.state.data[1] : {}}
-        symbol={this.state.count>1? this.state.dataSymbols[1] : ""}
-        width={this.props.width/2}/>
-      <GraphEntity
-        data={this.state.count>2 ? this.state.data[2] : {}}
-        symbol={this.state.count>2 ? this.state.dataSymbols[2] : ""}
-        width={this.props.width/2}/>
-    </div>
-    )
+
+      if(this.state.data.length === this.state.siphonSymbols.length) {
+
+        return (<div className="graphContainer">
+          <GraphEntity
+            data={this.state.data[0]}
+            symbol={this.state.dataSymbols[0]}
+            width={this.props.width/2}/>
+          </div>)
+
+      } else {
+        return (<div className="graphContainer"> hey </div>);
+      }
   }
 }
 

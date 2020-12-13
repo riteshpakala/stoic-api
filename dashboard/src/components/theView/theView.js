@@ -26,10 +26,38 @@ class TheView extends React.Component {
 
     return (
     <div className="theViewContainer">
-      <Graph
-        count={4}
-        width={window.innerWidth*this.props.widthRatio}/>
-    </div>
+      <div className="graphsToTheLeft">
+        <Graph
+          symbol="aapl"
+          count={4}
+          width={window.innerWidth*this.props.widthRatio}/>
+        <Graph
+          symbol="msft"
+          count={4}
+          width={window.innerWidth*this.props.widthRatio}/>
+        <Graph
+          symbol="amzn"
+          count={4}
+          width={window.innerWidth*this.props.widthRatio}/>
+      </div>
+
+      <div className="graphsToTheRight">
+
+        <Graph
+          symbol="tsla"
+          count={4}
+          width={window.innerWidth*this.props.widthRatio}/>
+        <Graph
+          symbol="goog"
+          count={4}
+          width={window.innerWidth*this.props.widthRatio}/>
+        <Graph
+          symbol="fb"
+          count={4}
+          width={window.innerWidth*this.props.widthRatio}/>
+      </div>
+
+      </div>
     )
   }
 }

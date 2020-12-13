@@ -12,20 +12,20 @@
 .company__body {
 }
 
-.company__title {
+.graphTitle {
+    color: #F5F5F5;
+    padding-top: 12px;
+    padding-left: 16px;
+}
+.graphPrice {
     color: #F5F5F5;
     padding-top: 4px;
-    padding-left: 8px;
+    padding-left: 16px;
 }
-.company__price {
+.graphPriceChange {
     color: #F5F5F5;
-    padding-top: 2px;
-    padding-left: 8px;
-}
-.company__price-change {
-    color: #F5F5F5;
-    padding-top: 2px;
-    padding-left: 8px;
+    padding-top: 4px;
+    padding-left: 16px;
 }
 
 /*
