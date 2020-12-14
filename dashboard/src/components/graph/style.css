@@ -28,6 +28,46 @@
     padding-left: 16px;
 }
 
+.glowAnimations {
+  animation: glowing 2s infinite;
+}
+
+.graphChartContainer {
+  position: relative;
+}
+.graphChartPrediction {
+  position: absolute;
+  top: 0;
+}
+
+.graphChartFlickerGreen {
+  animation: flicker 6s infinite step-end;
+}
+
+.graphChartFlickerRed {
+  animation: flicker 5s infinite 2s step-end;
+}
+
+#predictionLine {
+  position: absolute;
+  right: 35px;
+}
+
+.filter {
+  filter: drop-shadow( 0 2px 1px #F5F5F5 );
+
+}
+
+@keyframes flicker {
+  0%    { opacity: 1;   }
+  3%    { opacity: 0.4; }
+  6%    { opacity: 1;   }
+  7%    { opacity: 0.4; }
+  8%    { opacity: 1;   }
+  9%    { opacity: 0.4; }
+  10%   { opacity: 1;   }
+  100%  { opacity: 1;   }
+}
 /*
 
 rgba(18,18,18,0.84) fadedblack
@@ -35,3 +75,41 @@ rgba(220, 170, 55, 0.5) gold glow
 161,154,142,0.6 stoicMarbleBrown
 
 */
+
+@-webkit-keyframes glowing {
+  0% { background-color: #B20000; -webkit-box-shadow: 0 0 3px #B20000  !important; }
+  50% { background-color: #FF0000; -webkit-box-shadow: 0 0 40px #FF0000  !important; }
+  100% { background-color: #B20000; -webkit-box-shadow: 0 0 3px #B20000  !important; }
+
+  0% { fill: #B20000; -webkit-box-shadow: 0 0 3px #B20000  !important; }
+  50% { fill: #FF0000; -webkit-box-shadow: 0 0 40px #FF0000  !important; }
+  100% { fill: #B20000; -webkit-box-shadow: 0 0 3px #B20000  !important; }
+}
+
+@keyframes glowing2 {
+  0% {
+    background-color: #B20000;
+    box-shadow: 0 0 3px #B20000  !important;
+  }
+  50% {
+    background-color: #FF0000;
+    box-shadow: 0 0 40px #FF0000  !important;
+  }
+  100% {
+    background-color: #B20000;
+    box-shadow: 0 0 3px #B20000  !important;
+  }
+
+  0% {
+    fill: #B20000;
+    box-shadow: 0 0 3px #B20000  !important;
+  }
+  50% {
+    fill: #FF0000;
+    box-shadow: 0 0 40px #FF0000  !important;
+  }
+  100% {
+    fill: #B20000;
+    ox-shadow: 0 0 3px #B20000  !important;
+  }
+}

@@ -13,6 +13,8 @@ class GraphEntity extends React.Component {
     this.setup = this.setup.bind(this);
     this.drawChartGreen = this.drawChartGreen.bind(this);
     this.drawChartRed = this.drawChartRed.bind(this);
+    this.addGlow = this.addGlow.bind(this);
+    this.addPredictionLine = this.addPredictionLine.bind(this);
 
     this.state = {
       width: 400,
@@ -56,7 +58,6 @@ class GraphEntity extends React.Component {
         return data.json();
     }).then(json => {
         let lastValue = jsonAggregratedData[Object.keys(jsonAggregratedData).pop()]
-        console.log(lastValue);
 
         let jsonData = {};
         jsonData["date"] = Date.parse(json.nextTradingDate);
@@ -89,8 +90,10 @@ class GraphEntity extends React.Component {
       </div>
       <div className={"company__price-change"+`${this.state.symbol}`+" graphPriceChange courierMedium"}>
       </div>
-      <div className="company__chart-container">
+      <div className="company__chart-container graphChartContainer">
         <div className={"company__chart"+`${this.state.symbol}`}>
+        </div>
+        <div className={"company__chart_prediction"+`${this.state.symbol}`+" graphChartPrediction "+`${this.state.isGainer ? "graphChartFlickerGreen" : "graphChartFlickerRed"}`}>
         </div>
         <div className="company__chart-select-container">
           <div className="company__chart-select-1"></div>
@@ -118,6 +121,7 @@ class GraphEntity extends React.Component {
     var svg = d3
       .select(".company__chart"+this.state.symbol)
       .append("svg")
+      .attr("id", "svg"+this.state.symbol)
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
@@ -168,13 +172,17 @@ class GraphEntity extends React.Component {
       .attr("text-anchor", "left")
       .attr("alignment-baseline", "middle");
 
+    // let lastItem = data.pop();
+    // console.log(data);
+    // console.log(lastItem);
     // Add the line
     svg
       .append("path")
       .datum(data)
       .attr("fill", "none")
       .attr("stroke", "rgba(0,200,5,1)")
-      .attr("stroke-width", 1.5)
+      .attr("stroke-width", 4.0)
+      .attr("stroke-linecap", "round")
       .attr(
         "d",
         d3
@@ -187,8 +195,39 @@ class GraphEntity extends React.Component {
           })
       );
 
+/// PREDICTION LINE
+
+      let items = data.slice(data.length - 2, data.length);
+
+      let svgPrediction = this.addPredictionLine(items, width, height, margin, x, y, "0,200,5");
+      var defsPrediction = svgPrediction.append("defs");
+      this.addGlow(defsPrediction);
+
+      var defs = svg.append("defs");
+      let colorMatrix = "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0";
+      ///-------
+      //Filter for the outside glow
+      var filter = defs.append("filter")
+          .attr("id","shadow")
+      filter.append("feColorMatrix")
+        .attr("type", "matrix")
+        .attr("values", colorMatrix)
+      filter.append("feGaussianBlur")
+          .attr("stdDeviation","4.8")
+          .attr("result","coloredBlur");
+      var feMerge = filter.append("feMerge");
+      feMerge.append("feMergeNode")
+          .attr("in","coloredBlur");
+      feMerge.append("feMergeNode")
+          .attr("in","SourceGraphic");
+      //----append the svg object to the body of the page
+
+      d3.selectAll("#svg"+this.state.symbol)
+          .style("filter", "url(#shadow)");
+
+
     //   // Create a rect on top of the svg area: this rectangle recovers mouse position
-    svg
+    svgPrediction
       .append("rect")
       .style("fill", "none")
       .style("pointer-events", "all")
@@ -266,6 +305,7 @@ class GraphEntity extends React.Component {
     var svg = d3
       .select(".company__chart"+this.state.symbol)
       .append("svg")
+      .attr("id", "svg"+this.state.symbol)
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
@@ -322,7 +362,8 @@ class GraphEntity extends React.Component {
       .datum(data)
       .attr("fill", "none")
       .attr("stroke", "rgba(255,80,0,1)")
-      .attr("stroke-width", 1.5)
+      .attr("stroke-width", 4.0)
+      .attr("stroke-linecap", "round")
       .attr(
         "d",
         d3
@@ -335,8 +376,38 @@ class GraphEntity extends React.Component {
           })
       );
 
+      /// PREDICTION LINE
+
+      let items = data.slice(data.length - 2, data.length);
+
+      let svgPrediction = this.addPredictionLine(items, width, height, margin, x, y, "255,80,0");
+      var defsPrediction = svgPrediction.append("defs");
+      this.addGlow(defsPrediction);
+
+      var defs = svg.append("defs");
+      let colorMatrix = "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0";
+      ///-------
+      //Filter for the outside glow
+      var filter = defs.append("filter")
+          .attr("id","shadow")
+      filter.append("feColorMatrix")
+        .attr("type", "matrix")
+        .attr("values", colorMatrix)
+      filter.append("feGaussianBlur")
+          .attr("stdDeviation","4.8")
+          .attr("result","coloredBlur");
+      var feMerge = filter.append("feMerge");
+      feMerge.append("feMergeNode")
+          .attr("in","coloredBlur");
+      feMerge.append("feMergeNode")
+          .attr("in","SourceGraphic");
+      //----append the svg object to the body of the page
+
+      d3.selectAll("#svg"+this.state.symbol)
+          .style("filter", "url(#shadow)");
+
     //   // Create a rect on top of the svg area: this rectangle recovers mouse position
-    svg
+    svgPrediction
       .append("rect")
       .style("fill", "none")
       .style("pointer-events", "all")
@@ -397,6 +468,165 @@ class GraphEntity extends React.Component {
         `<span>\$${diffVal.toFixed(2)}(${diffPercentage.toFixed(2)}%)</span>` //**** */
       ); //**** */
     }
+  }
+
+  addGlow(defs) {
+    let shadowCM1 = "0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0";
+    let shadowCM2 = "0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.9 0";
+    let shadowCM3 = "0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.8 0";
+    let shadowCM4 = "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.69678442 0";
+    let shadowCM5 = "0 0 0 0 0.314369351 0 0 0 0 0.8883757 0 0 0 0 0.759899616 0 0 0 0.649371603 0";
+
+    //Filter for the outside glow
+    var filter = defs.append("filter")
+        .attr("id","glow"+this.state.symbol)
+        .attr("filterUnits","userSpaceOnUse");
+
+    filter.append("feOffset")
+        .attr("in","SourceAlpha")
+        .attr("result","shadowOffsetOuter1");
+    filter.append("feGaussianBlur")
+        .attr("stdDeviation","5")
+        .attr("in","shadowOffsetOuter1")
+        .attr("result","shadowBlurOuter1");
+    filter.append("feColorMatrix")
+        .attr("type","matrix")
+        .attr("values",shadowCM1)
+        .attr("in","shadowBlurOuter1")
+        .attr("result","shadowMatrixOuter1");
+
+    filter.append("feOffset")
+        .attr("in","SourceAlpha")
+        .attr("dy","1")
+        .attr("result","shadowOffsetOuter2");
+    filter.append("feGaussianBlur")
+        .attr("stdDeviation","7")
+        .attr("in","shadowOffsetOuter2")
+        .attr("result","shadowBlurOuter2");
+    filter.append("feColorMatrix")
+        .attr("type","matrix")
+        .attr("values",shadowCM2)
+        .attr("in","shadowBlurOuter2")
+        .attr("result","shadowMatrixOuter2");
+
+
+    filter.append("feOffset")
+      .attr("in","SourceAlpha")
+      .attr("dy","2")
+      .attr("result","shadowOffsetOuter3");
+    filter.append("feGaussianBlur")
+      .attr("stdDeviation","10")
+      .attr("in","shadowOffsetOuter3")
+      .attr("result","shadowBlurOuter3");
+    filter.append("feColorMatrix")
+      .attr("type","matrix")
+      .attr("values",shadowCM3)
+      .attr("in","shadowBlurOuter3")
+      .attr("result","shadowMatrixOuter3");
+
+
+    filter.append("feOffset")
+      .attr("in","SourceAlpha")
+      .attr("dx","2")
+      .attr("dy","2")
+      .attr("result","shadowOffsetOuter4");
+    filter.append("feGaussianBlur")
+      .attr("stdDeviation","4")//creates a singular baseline
+      .attr("in","shadowOffsetOuter4")
+      .attr("result","shadowBlurOuter4");
+    filter.append("feColorMatrix")
+      .attr("type","matrix")
+      .attr("values",shadowCM4)
+      .attr("in","shadowBlurOuter4")
+      .attr("result","shadowMatrixOuter4");
+
+    filter.append("feOffset")
+      .attr("in","SourceAlpha")
+      .attr("dy","2")
+      .attr("result","shadowOffsetOuter5");
+    filter.append("feGaussianBlur")
+      .attr("stdDeviation","8")
+      .attr("in","shadowOffsetOuter5")
+      .attr("result","shadowBlurOuter5");
+    filter.append("feColorMatrix")
+      .attr("type","matrix")
+      .attr("values",shadowCM5)
+      .attr("in","shadowBlurOuter5")
+      .attr("result","shadowMatrixOuter5");
+
+    var feMerge = filter.append("feMerge");
+    feMerge.append("feMergeNode")
+        .attr("in","shadowMatrixOuter1");
+    feMerge.append("feMergeNode")
+        .attr("in","shadowMatrixOuter2");
+    feMerge.append("feMergeNode")
+        .attr("in","shadowMatrixOuter3");
+    feMerge.append("feMergeNode")
+        .attr("in","shadowMatrixOuter4");
+    feMerge.append("feMergeNode")
+        .attr("in","shadowMatrixOuter5");
+  }
+
+  addPredictionLine(items, width, height, margin, x, y, color) {
+    var svgPrediction = d3
+      .select(".company__chart_prediction"+this.state.symbol)
+      .append("svg")
+      .attr("id", "svgprediction"+this.state.symbol)
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+      // let i;
+      // for (i = 0; i < 4; i++) {
+      //   svgPrediction
+      //     .append("path")
+      //     .datum(items)
+      //     .attr("fill", "#FFF")
+      //     .attr("stroke", "rgba(255, 255, 255, 1)") //"+color+","+(1.0/i)+")")
+      //     .attr("stroke-linecap", "round")
+      //     .attr("stroke-width", 4.0)
+      //     .attr("stroke-opacity", 1.0/i)
+      //     .attr("id", "prediction")
+      //     .attr(
+      //       "d",
+      //       d3
+      //         .line()
+      //         .x(function (d) {
+      //           return x(d.date);
+      //         })
+      //         .y(function (d) {
+      //           return y(d.value);
+      //         })
+      //     );
+      // }
+
+      svgPrediction
+        .append("path")
+        .datum(items)
+        .attr("fill", "#FFF")
+        .attr("stroke", "rgba(255, 255, 255, 1)") //"+color+","+(1.0/i)+")")
+        .attr("stroke-linecap", "round")
+        .attr("stroke-width", 4.0)
+        .attr("id", "prediction")
+        .attr(
+          "d",
+          d3
+            .line()
+            .x(function (d) {
+              return x(d.date);
+            })
+            .y(function (d) {
+              return y(d.value);
+            })
+        );
+
+        ////
+      //Apply to your element(s)
+      d3.selectAll("#svgprediction"+this.state.symbol)
+          .style("filter", "url(#glow"+this.state.symbol+")");
+
+      return svgPrediction;
   }
 
   // drawChartRed(data) {
