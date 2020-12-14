@@ -31,7 +31,7 @@ class Graph extends React.Component {
 
   componentDidMount() {
 
-    let vw = (this.props.width/2) - 16;
+    let vw = (this.props.width/3) - 16;
     document.documentElement.style.setProperty('--vw', `${vw}px`);
     document.documentElement.style.setProperty('--vh', `220px`);
     document.querySelector(".graphContainer").addEventListener( 'mouseup', this.onMouseUp, false );
@@ -76,7 +76,7 @@ class Graph extends React.Component {
           <GraphEntity
             data={this.state.data[0]}
             symbol={this.state.dataSymbols[0]}
-            width={this.props.width/2}/>
+            width={this.props.width/3}/>
           </div>)
 
       } else {

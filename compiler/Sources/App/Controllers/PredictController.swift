@@ -65,8 +65,10 @@ struct PredictController: RouteCollection {
                                 neu: neu,
                                 type: type)
                 
-                
-                return Prediction.init(prediction: value, metadata: model.metadata, type: type)
+                let posAsString = String(round(100*pos)/100)
+                let negAsString = String(round(100*neg)/100)
+                let neuAsString = String(round(100*neu)/100)
+                return Prediction.init(prediction: value, metadata: model.metadata, type: type, posValue: posAsString, negValue: negAsString, neuValue: neuAsString)
             }))
         } else {
             print("fml \(symbol)")
@@ -193,7 +195,7 @@ struct PredictController: RouteCollection {
 
     func runModel(model: Data, dataSet: Data, pos: Double, neg: Double, neu: Double, type: String) -> String {
         if let models = model.model, let data = dataSet.dataSet, data.keys.contains(type) {
-            print(data[type])
+//            print(data[type])
             var closeData: [Double] = data[type] ?? []
             let posIndex: Int = closeData.count - 3
             let negIndex: Int = closeData.count - 2
@@ -216,6 +218,11 @@ struct PredictController: RouteCollection {
                 
                 return "error"
             }
+            
+            print ("""
+                input: \(closeData)
+                prediction: \(output)
+                """)
             return "\(output)"
         }
         

@@ -1,9 +1,11 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import './style.css';
 import '../../constants/GlobalStyle.css';
 import * as d3 from "d3";
+import socketIOClient from "socket.io-client";
+const ENDPOINT = "http://192.168.1.39:8000";
 
 class GraphEntity extends React.Component {
 
@@ -18,8 +20,13 @@ class GraphEntity extends React.Component {
 
     this.state = {
       width: 400,
-      height: 160,
-      isGainer: true };
+      height: 320,
+      isGainer: true,
+      positiveSentiment: "0%",
+      negativeSentiment: "0%",
+      neutralSentiment: "0%"};
+
+
   }
 
   componentWillMount() {
@@ -28,6 +35,54 @@ class GraphEntity extends React.Component {
 
   componentDidMount() {
     this.setup(this.props);
+
+
+    const socket = socketIOClient(ENDPOINT);
+
+
+    socket.on("hello", data => {
+      if (data.data.symbol.toLowerCase() == "$"+this.state.symbol.toLowerCase()) {
+        fetch('/api/david/v0.00.00/stock/predict/'+data.data.symbol.toUpperCase()+'?neu='+data.data.neu+'&neg='+data.data.neg+'&pos='+data.data.pos+'&type=close').then(results => {
+            return results;
+        }).then(data => {
+            return data.json();
+        }).then(json => {
+            let jsonAggregratedData = this.state.newData;
+            let lastValue = jsonAggregratedData[jsonAggregratedData.length - 2];
+            let jsonData = {};
+            jsonData["date"] = Date.parse(json.nextTradingDate);
+            jsonData["dateString"] = json.nextTradingDate;
+            jsonData["value"] = parseFloat(json.prediction);
+            jsonAggregratedData[jsonAggregratedData.length - 1] = jsonData;
+
+            console.log(jsonAggregratedData[0]);
+            let change = parseFloat(json.prediction) - parseFloat(jsonAggregratedData[0].value);
+            change = (Math.round(change * 100) / 100).toFixed(2); //**** */
+            var diffPercentage = (parseFloat(json.prediction) * 100) / parseFloat(jsonAggregratedData[0].value) - 100;
+
+            d3.select(".company__price"+this.state.symbol).html(`<span>\$${json.prediction}</span>`);
+            d3.select(".company__price-change"+this.state.symbol).html(
+              `<span>\$${change}(${diffPercentage.toFixed(2)}%)</span>`
+            )
+            d3.select("#userUpdated"+this.state.symbol).html(
+              `<span>@${data.data.user}</span>`
+            )
+
+            var el = document.getElementById('userUpdated'+this.state.symbol);
+            el.style.animation = 'none';
+            el.offsetHeight; /* trigger reflow */
+            el.style.animation = null;
+
+            this.setState({
+              newData: jsonAggregratedData,
+               isGainer: jsonData.value > lastValue.value,
+               positiveSentiment: (parseFloat(json.posValue)*100).toString()+"%",
+               negativeSentiment: (parseFloat(json.negValue)*100).toString()+"%",
+               neutralSentiment: (parseFloat(json.neuValue)*100).toString()+"%"});
+
+        });
+      }
+    });
   }
 
   componentWillUnmount() {
@@ -65,12 +120,41 @@ class GraphEntity extends React.Component {
         jsonData["value"] = parseFloat(json.prediction);
         jsonAggregratedData.push(jsonData);
 
-        this.setState({width: resizedWidth, height: resizedHeight, symbol: nextProps.symbol, newData: jsonAggregratedData, isGainer: jsonData.value > lastValue.value});
+        console.log(nextProps.symbol);
+        console.log(json.posValue);
+        console.log(json.neuValue);
+        console.log(json.negValue);
+
+        // d3.select(".positive_sentiment"+this.state.symbol).html(
+        //   `<span>${parseFloat(json.posValue)*100}%</span>`
+        // );
+        //
+        // d3.select(".negative_sentiment"+this.state.symbol).html(
+        //   `<span>${parseFloat(json.negValue)*100}%</span>`
+        // );
+        //
+        // d3.select(".neutral_sentiment"+this.state.symbol).html(
+        //   `<span>${parseFloat(json.neuValue)*100}%</span>`
+        // );
+
+
+        this.setState({
+          width: resizedWidth,
+           height: resizedHeight,
+            symbol: nextProps.symbol,
+             newData: jsonAggregratedData,
+              isGainer: jsonData.value > lastValue.value,
+              positiveSentiment: (parseFloat(json.posValue)*100).toString()+"%",
+              negativeSentiment: (parseFloat(json.negValue)*100).toString()+"%",
+              neutralSentiment: (parseFloat(json.neuValue)*100).toString()+"%"});
 
     });
   }
 
   componentDidUpdate() {
+    d3.select("#svg"+this.state.symbol).remove();
+    d3.select("#svgprediction"+this.state.symbol).remove();
+
     if (this.state.isGainer) {
 
       this.drawChartGreen(this.state.newData);
@@ -84,12 +168,31 @@ class GraphEntity extends React.Component {
 
     return (
     <div className="company__body courierMedium">
-      <div className={"company__title"+`${this.state.symbol}`+" graphTitle courierMedium"}>
+      <div id= {"userUpdated"+`${this.state.symbol}`} className="userUpdated courierSemiLarge">
+        user updated
       </div>
-      <div className={"company__price"+`${this.state.symbol}`+" graphPrice courierMedium"}>
+      <div className="companyMetadata">
+        <div className={"company__title"+`${this.state.symbol}`+" graphTitle courierLarge "+`${this.state.isGainer ? "stoicGreen" : "stoicRed"}`}>
+        </div>
+        <div className={"company__price"+`${this.state.symbol}`+" graphPrice courierSemiLarge"}>
+        </div>
+        <div className={"company__price-change"+`${this.state.symbol}`+" graphPriceChange courierSemiLarge"}>
+        </div>
       </div>
-      <div className={"company__price-change"+`${this.state.symbol}`+" graphPriceChange courierMedium"}>
+      <div className="sentimentMetadata">
+        <div className="sentimentContainer">
+        <div className={"positive_sentiment"+`${this.state.symbol}`+" graphSentiment courierMedium"}>
+          <span> { "postive sentiment: "+`${ this.state.positiveSentiment }` } </span>
+        </div>
+        <div className={"negative_sentiment"+`${this.state.symbol}`+" graphSentiment courierMedium"}>
+          <span> { "negative sentiment: "+`${ this.state.negativeSentiment }` } </span>
+        </div>
+        <div className={"neutral_sentiment"+`${this.state.symbol}`+" graphSentiment courierMedium"}>
+          <span> { "neutral sentiment: "+`${ this.state.neutralSentiment }` } </span>
+        </div>
+        </div>
       </div>
+      <div className="spacerForChart"> </div>
       <div className="company__chart-container graphChartContainer">
         <div className={"company__chart"+`${this.state.symbol}`}>
         </div>
@@ -109,8 +212,8 @@ class GraphEntity extends React.Component {
   drawChartGreen(data) {
     // set the dimensions and margins of the graph
     var margin = {
-        top: 50,
-        right: 30,
+        top: 90,
+        right: 20,
         bottom: 30,
         left: 20,
       },
@@ -244,7 +347,21 @@ class GraphEntity extends React.Component {
     }
 
     let symbol = this.state.symbol;
-    d3.select(".company__title"+symbol).html(`<span>\$${symbol}</span>`);
+    d3.select(".company__title"+symbol).html(`<span>\$${symbol.toUpperCase()}</span>`);
+
+    ///////////
+    // console.log(selectedData.date, selectedData.value);
+    var newDate = data[data.length-1].dateString;//.toDateString();
+    var newVal = (Math.round(data[data.length-1].value * 100) / 100).toFixed(2);
+    var diffVal = newVal - data[0].value; //***** */
+    diffVal = (Math.round(diffVal * 100) / 100).toFixed(2); //**** */
+    var diffPercentage = (newVal * 100) / data[0].value - 100;
+
+    d3.select(".company__price"+symbol).html(`<span>\$${newVal}</span>`);
+    d3.select(".company__price-change"+symbol).html(
+      `<span>\$${diffVal}(${diffPercentage.toFixed(2)}%)</span>`
+    ); //**** */
+    /////
 
     function mousemove() {
       // recover coordinate we need
@@ -293,7 +410,7 @@ class GraphEntity extends React.Component {
   drawChartRed(data) {
     // set the dimensions and margins of the graph
     var margin = {
-        top: 50,
+        top: 90,
         right: 30,
         bottom: 30,
         left: 20,
@@ -424,7 +541,21 @@ class GraphEntity extends React.Component {
     }
 
     let symbol = this.state.symbol;
-    d3.select(".company__title"+symbol).html(`<span>\$${symbol}</span>`);
+    d3.select(".company__title"+symbol).html(`<span>\$${symbol.toUpperCase()}</span>`);
+
+    ///////////
+    // console.log(selectedData.date, selectedData.value);
+    var newDate = data[data.length-1].dateString;//.toDateString();
+    var newVal = (Math.round(data[data.length-1].value * 100) / 100).toFixed(2);
+    var diffVal = newVal - data[0].value; //***** */
+    diffVal = (Math.round(diffVal * 100) / 100).toFixed(2); //**** */
+    var diffPercentage = (newVal * 100) / data[0].value - 100;
+
+    d3.select(".company__price"+symbol).html(`<span>\$${newVal}</span>`);
+    d3.select(".company__price-change"+symbol).html(
+      `<span>\$${diffVal}(${diffPercentage.toFixed(2)}%)</span>`
+    ); //**** */
+    /////
 
     function mousemove() {
       // recover coordinate we need

@@ -1,35 +1,68 @@
 .graphContainer {
     width: var(--vw, 1vw);
+    height: 320px;
     background-color: rgba(18, 18, 18, 0.75);
     border-radius: 8px;
     box-shadow: 0px 0px 20px 4px rgba(18,18,18,0.42);
-    box-shadow: inset 0px 0px 12px 4px rgba(161,154,142,0.42);
+    /* box-shadow: inset 0px 0px 12px 4px rgba(161,154,142,0.42); */
+    box-shadow: inset 2px 2px 8px 4px rgba(18, 18, 18, 0.7);
     margin-top: 8px;
-    margin-left: 8px;
+    /* margin-left: 8px; */
 
 }
 
 .company__body {
+  position: relative;
 }
 
+.userUpdated {
+  color: #EC6CFF;
+  bottom: 0px;
+  right: 4px;
+  position: absolute;
+  animation: fadeOut 3s ease-in-out;/*New content */
+  -webkit-animation: fadeOut 3s ease-in-out;
+  -webkit-animation-fill-mode: forwards;
+  animation-fill-mode: forwards;
+}
+.spacerForChart {
+  width: 100%;
+  height: 60px;
+}
 .graphTitle {
-    color: #F5F5F5;
     padding-top: 12px;
     padding-left: 16px;
 }
 .graphPrice {
-    color: #F5F5F5;
     padding-top: 4px;
     padding-left: 16px;
+    color: rgba(210,203,193, 0.93);
+    text-shadow: 1px 5px 6px rgb(220, 170, 55, 0.7);
 }
 .graphPriceChange {
-    color: #F5F5F5;
     padding-top: 4px;
     padding-left: 16px;
+    color: rgba(210,203,193, 0.93);
+    text-shadow: 1px 5px 6px rgb(220, 170, 55, 0.7);
+}
+.graphSentiment {
+
+  color: #EC6CFF;
+  text-shadow: 1px 4px 4px rgb(255, 47, 245, 0.7);
+}
+.companyMetadata {
+  position: absolute;
 }
 
-.glowAnimations {
-  animation: glowing 2s infinite;
+.sentimentMetadata {
+  position: relative;
+}
+
+.sentimentContainer {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  color: #FFF;
 }
 
 .graphChartContainer {
@@ -86,30 +119,30 @@ rgba(220, 170, 55, 0.5) gold glow
   100% { fill: #B20000; -webkit-box-shadow: 0 0 3px #B20000  !important; }
 }
 
-@keyframes glowing2 {
+@keyframes fadeOut {
   0% {
-    background-color: #B20000;
-    box-shadow: 0 0 3px #B20000  !important;
-  }
-  50% {
-    background-color: #FF0000;
-    box-shadow: 0 0 40px #FF0000  !important;
-  }
-  100% {
-    background-color: #B20000;
-    box-shadow: 0 0 3px #B20000  !important;
+    opacity: 0;
+    text-shadow: 0 4px 10px rgba(161,154,142,0.84);
   }
 
-  0% {
-    fill: #B20000;
-    box-shadow: 0 0 3px #B20000  !important;
-  }
   50% {
-    fill: #FF0000;
-    box-shadow: 0 0 40px #FF0000  !important;
+    opacity: 1.0;
+    text-shadow: 0 4px 4px rgba(161,154,142,0.84);
   }
+
   100% {
-    fill: #B20000;
-    ox-shadow: 0 0 3px #B20000  !important;
+    opacity: 0.0;
+    text-shadow: 0 4px 10px rgba(161,154,142,0.84);
   }
+
+}
+
+.glowAnimations {
+    animation: glow .5s infinite alternate;
+}
+
+@keyframes glow {
+    to {
+        text-shadow: 0 4px 10px rgba(161,154,142,0.84);
+    }
 }

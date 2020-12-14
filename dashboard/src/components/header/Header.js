@@ -34,6 +34,8 @@ class Header extends React.Component {
                 </p>
             </div>
 
+            <div className="modelType courierSemiLarge stoicPurple"> <span> predicting: close </span> </div>
+
             <div className="headerDetailsContainer marginRightPadding">
               <p className="courierSemiLarge fade-in-copy-2">
                   <a className="stoicOrange" >{this.props.subtitle}</a>

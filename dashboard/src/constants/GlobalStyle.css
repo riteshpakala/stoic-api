@@ -17,8 +17,16 @@ Color system
     color: #39FF14;
 }
 
+.stoicGreen {
+    color: #39FF14;
+}
+
 .stoicBlack {
     color: #121212;
+}
+
+.stoicRed {
+    color: #D90000;
 }
 
 .stoicMarbleBrown {

@@ -4,6 +4,8 @@ var express = require('express');
 var cors = require('cors');
 const fetch = require('node-fetch');
 const csvtojson = require('csvtojson');
+var bodyParser = require('body-parser');
+const socketIo = require("socket.io");
 
 var forceSsl = function (req, res, next) {
    if (req.headers['x-forwarded-proto'] !== 'https') {
@@ -44,6 +46,8 @@ app.use('/', express.static(__dirname));
 app.set('port', (process.env.PORT || 8000));
 
 app.use(express.static("dist"));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get("/api/david/v0.00.00/think", function(req, res) {
   //Get up to 12 of the latest predictions
@@ -163,6 +167,17 @@ app.get("/api/david/v0.00.00/stock/predict/:id", function(req, res) {
 
 });
 
+app.post('/api/david/v0.00.00/stock/predict', function(req, res) {
+  // res.sendFile(path.join(__dirname, '../privacy_policy.pdf'), function(err) {
+  //   if (err) {
+  //     res.status(500).send(err)
+  //   }
+  // })
+  console.log(req.body);
+  io.sockets.emit("hello", req.body);
+   res.send();
+});
+
 app.get('/terms', function(req, res) {
   // res.sendFile(path.join(__dirname, '../privacy_policy.pdf'), function(err) {
   //   if (err) {
@@ -197,6 +212,24 @@ app.get('/*', function(req, res) {
 //   res.sendFile(path.resolve(__dirname, 'index.html'));
 // });
 
-app.listen(app.get('port'), function () {
-    console.log(`Node app is running on port: ${app.get('port')}`)
+const http = require('http').Server(app);
+
+const io = require('socket.io')(http, {
+  cors: {
+    origin: "http://192.168.1.39:8001",
+    methods: ["GET", "POST"]
+  }
+});
+
+io.on('connection', (socket) => {
+    //your code here
+    console.log("connected");
 })
+
+const server = http.listen(app.get('port'), () => {
+      console.log('Started');
+});
+
+// app.listen(app.get('port'), function () {
+//     console.log(`Node app is running on port: ${app.get('port')}`)
+// })

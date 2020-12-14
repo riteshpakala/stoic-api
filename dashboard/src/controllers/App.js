@@ -60,7 +60,7 @@ class App extends React.Component {
           {<Sound isPlaying={this.state.playing} setVolume={this.state.volume} />}
         </div>
 
-        { <TheView size={4} widthRatio={0.8} /> }
+        { <TheView size={4} widthRatio={0.95} /> }
 
 
         {<Button isPlaying={this.state.playing} clickController={this.clickController} />}

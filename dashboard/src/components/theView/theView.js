@@ -57,6 +57,22 @@ class TheView extends React.Component {
           width={window.innerWidth*this.props.widthRatio}/>
       </div>
 
+      <div className="graphsToTheRight">
+
+        <Graph
+          symbol="mrna"
+          count={4}
+          width={window.innerWidth*this.props.widthRatio}/>
+        <Graph
+          symbol="nvda"
+          count={4}
+          width={window.innerWidth*this.props.widthRatio}/>
+        <Graph
+          symbol="amd"
+          count={4}
+          width={window.innerWidth*this.props.widthRatio}/>
+      </div>
+
       </div>
     )
   }

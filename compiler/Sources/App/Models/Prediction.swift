@@ -12,9 +12,13 @@ final class Prediction: Content {
     let daysTrained: String
     let sentimentStrength: String
     
+    let posValue: String
+    let negValue: String
+    let neuValue: String
+    
     let type: String
 
-    init(id: UUID = UUID(), prediction: String, metadata: Data, type: String) {
+    init(id: UUID = UUID(), prediction: String, metadata: Data, type: String, posValue: String = "", negValue: String = "", neuValue: String = "") {
         self.id = id
         self.prediction = prediction
         
@@ -25,5 +29,8 @@ final class Prediction: Content {
         
         self.type = type
         
+        self.posValue = posValue
+        self.negValue = negValue
+        self.neuValue = neuValue
     }
 }
