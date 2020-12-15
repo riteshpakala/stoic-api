@@ -7,19 +7,26 @@ class Header extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {animate: true};
+    this.state = {animate: true, todaysDate: ""};
   }
 
   componentDidMount() {
+    let today = new Date();
+    let dd = 15;// today.getDate()+(this.props.isReady ? 1 : 0);
+    let mm = today.getMonth()+1;
+    let yyyy = today.getFullYear();
+    let date = yyyy+'-'+mm+'-'+dd;
     if(window.sessionStorage.getItem("firstLoadDone") === null) {
       this.setState({
         animate: true,
+        todaysDate: date
       })
 
       window.sessionStorage.setItem("firstLoadDone", 1);
     } else {
       this.setState({
         animate: false,
+        todaysDate: date
       })
     }
   }
@@ -34,7 +41,7 @@ class Header extends React.Component {
                 </p>
             </div>
 
-            <div className="modelType courierSemiLarge stoicPurple"> <span> predicting: close </span> </div>
+            <div className="modelType courierSemiLarge stoicPurple"> <span> predicting: close // { this.state.todaysDate }</span> </div>
 
             <div className="headerDetailsContainer marginRightPadding">
               <p className="courierSemiLarge fade-in-copy-2">

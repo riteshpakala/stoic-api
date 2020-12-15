@@ -13,6 +13,7 @@
 
 .company__body {
   position: relative;
+  height: 100%;
 }
 
 .userUpdated {
@@ -45,14 +46,102 @@
     color: rgba(210,203,193, 0.93);
     text-shadow: 1px 5px 6px rgb(220, 170, 55, 0.7);
 }
+
+.graphDaysTrained {
+  padding-top: 4px;
+  padding-left: 16px;
+  color: rgba(210,203,193, 0.93);
+  text-shadow: 1px 5px 6px rgb(220, 170, 55, 0.7);
+}
+
 .graphSentiment {
 
-  color: #EC6CFF;
+  color: #dcbfe0;
   text-shadow: 1px 4px 4px rgb(255, 47, 245, 0.7);
 }
 .companyMetadata {
   position: absolute;
 }
+.backtest {
+  background-color: rgba(161,154,142,0.75);
+  width: auto;
+  height: 30px;
+  position: relative;
+  border-radius: 8px;
+  padding: 12px;
+
+  display: inline-grid;
+  justify-content: center;
+}
+
+.backtestSuperContainer {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  animation: float 5s ease-in-out infinite;
+}
+.isGainerText {
+  color: rgba(0,200,5,0.84) !important;
+}
+
+.isLoserText {
+  color: rgba(255,80,0,0.84) !important;
+}
+
+.backtest span {
+  text-align: left;
+}
+
+.currentPrice {
+  width: 100%;
+  line-height: 30px;
+  color: rgba(18, 18, 18, 0.75);
+}
+
+.currentError {
+  padding: 8px;
+  border-radius: 8px;
+  background-color: rgba(220, 170, 55, 0.75);
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  animation: float 7s ease-in-out infinite;
+}
+
+.backTestContainer {
+  width: 120%;
+  display: flex;
+  justify-content: flex-start;
+  height: 30px;
+  position: relative;
+}
+.backTestContainer span {
+  /* line-height: 30px; */
+}
+
+.actualsLabels {
+  color: rgba(161,154,142,0.98);
+  width: 90px;
+  height: 20px;
+  position: absolute;
+  top: -16px;
+  left: 4px;
+  font-size: 24px;
+  z-index: 12;
+}
+
+.liveBacktestIndicatorContainer {
+  width: 50%;
+}
+
+.liveBacktestIndicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+  background-color: #39FF14;
+  margin-left: 12px;
+}
+
 
 .sentimentMetadata {
   position: relative;
@@ -62,7 +151,11 @@
   position: absolute;
   top: 12px;
   right: 12px;
-  color: #FFF;
+  background-color: rgba(161,154,142,0.24);
+  padding: 12px;
+  height: 55px;
+  border-radius: 8px;
+  animation: float2 7s ease-in-out infinite;
 }
 
 .graphChartContainer {
@@ -145,4 +238,61 @@ rgba(220, 170, 55, 0.5) gold glow
     to {
         text-shadow: 0 4px 10px rgba(161,154,142,0.84);
     }
+}
+
+@keyframes float {
+	0% {
+		bottom: 12px;
+	}
+	50% {
+    bottom: 7px;
+	}
+	100% {
+    bottom: 12px;
+	}
+}
+
+@keyframes float2 {
+	0% {
+		box-shadow: 0 6px 10px 0px rgba(161,154,142,0.6);
+		top: 12px;
+	}
+	50% {
+		box-shadow: 0 8px 12px 0px rgba(161,154,142,0.2);
+    top: 7px;
+	}
+	100% {
+		box-shadow: 0 6px 10px 0px rgba(161,154,142,0.6);
+    top: 12px;
+	}
+}
+
+@keyframes floatGreen {
+	0% {
+		box-shadow: 0 6px 10px 0px rgba(161,154,142,0.6);
+		bottom: 12px;
+	}
+	50% {
+		box-shadow: 0 8px 12px 0px rgba(161,154,142,0.2);
+    bottom: 7px;
+	}
+	100% {
+		box-shadow: 0 6px 10px 0px rgba(161,154,142,0.6);
+    bottom: 12px;
+	}
+}
+
+@keyframes floatRed {
+	0% {
+		box-shadow: 0 6px 30px 0px rgba(255,80,0,0.6);
+		bottom: 12px;
+	}
+	50% {
+		box-shadow: 0 24px 20px 0px rgba(255,80,0,0.2);
+    bottom: 7px;
+	}
+	100% {
+		box-shadow: 0 6px 30px 0px rgba(255,80,0,0.6);
+    bottom: 12px;
+	}
 }

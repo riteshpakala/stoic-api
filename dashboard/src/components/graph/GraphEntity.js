@@ -16,6 +16,7 @@ class GraphEntity extends React.Component {
     this.drawChartGreen = this.drawChartGreen.bind(this);
     this.drawChartRed = this.drawChartRed.bind(this);
     this.addGlow = this.addGlow.bind(this);
+    this.stockAttr = this.stockAttr.bind(this);
     this.addPredictionLine = this.addPredictionLine.bind(this);
 
     this.state = {
@@ -24,9 +25,11 @@ class GraphEntity extends React.Component {
       isGainer: true,
       positiveSentiment: "0%",
       negativeSentiment: "0%",
-      neutralSentiment: "0%"};
-
-
+      neutralSentiment: "0%",
+      currentPrice: "$0000.00",
+      currentError: "0%",
+      type: "close",
+      daysTrained: 0};
   }
 
   componentWillMount() {
@@ -42,7 +45,7 @@ class GraphEntity extends React.Component {
 
     socket.on("hello", data => {
       if (data.data.symbol.toLowerCase() == "$"+this.state.symbol.toLowerCase()) {
-        fetch('/api/david/v0.00.00/stock/predict/'+data.data.symbol.toUpperCase()+'?neu='+data.data.neu+'&neg='+data.data.neg+'&pos='+data.data.pos+'&type=close').then(results => {
+        fetch('/api/david/v0.00.00/stock/predict/'+data.data.symbol.toUpperCase()+'?neu='+data.data.neu+'&neg='+data.data.neg+'&pos='+data.data.pos+'&type='+this.state.type).then(results => {
             return results;
         }).then(data => {
             return data.json();
@@ -73,15 +76,146 @@ class GraphEntity extends React.Component {
             el.offsetHeight; /* trigger reflow */
             el.style.animation = null;
 
+            let floatCurrentPrice = parseFloat(this.state.currentPrice.split("$")[1]);
+            let floatPreditionPrice = parseFloat(json.prediction);
+            let error = (floatPreditionPrice - floatCurrentPrice)/floatCurrentPrice;
+
             this.setState({
               newData: jsonAggregratedData,
                isGainer: jsonData.value > lastValue.value,
                positiveSentiment: (parseFloat(json.posValue)*100).toString()+"%",
                negativeSentiment: (parseFloat(json.negValue)*100).toString()+"%",
-               neutralSentiment: (parseFloat(json.neuValue)*100).toString()+"%"});
+               neutralSentiment: (parseFloat(json.neuValue)*100).toString()+"%",
+               currentError: (((error*100).toFixed(2)).toString())+"%"});
 
         });
       }
+    });
+
+    socket.on("world", data => {
+      fetch('/api/david/v0.00.00/stock/price/'+this.state.symbol).then(results => {
+          return results;
+      }).then(data => {
+          return data.json();
+      }).then(json => {
+          let lastItem = json[json.length - 1];
+          let stockValue = this.stockAttr(lastItem);
+
+          console.log(lastItem);
+          let floatCurrentPrice = parseFloat(stockValue);
+          let floatPreditionPrice = parseFloat(this.state.newData[this.state.newData.length-1].value);
+          let error = (floatPreditionPrice - floatCurrentPrice)/floatCurrentPrice;
+
+          this.setState({
+             currentPrice: "$"+stockValue,
+             currentError: (((error*100).toFixed(2)).toString())+"%",
+             isPastGainer: floatCurrentPrice > parseFloat(this.state.lastPrice.split("$")[1])
+           });
+      });
+    });
+
+    socket.on("neutral$"+this.props.symbol.toLowerCase(), data => {
+      ////// PLEASE ABSTRACT THIS OUT BRO
+      fetch('/api/david/v0.00.00/stock/predict/$'+this.props.symbol.toUpperCase()+'?neu=0.5&neg=0.25&pos=0.25&type='+this.state.type).then(results => {
+          return results;
+      }).then(data => {
+          return data.json();
+      }).then(json => {
+          let jsonAggregratedData = this.state.newData;
+          let lastValue = jsonAggregratedData[jsonAggregratedData.length - 2];
+          let jsonData = {};
+          jsonData["date"] = Date.parse(json.nextTradingDate);
+          jsonData["dateString"] = json.nextTradingDate;
+          jsonData["value"] = parseFloat(json.prediction);
+          jsonAggregratedData[jsonAggregratedData.length - 1] = jsonData;
+
+          console.log(jsonAggregratedData[0]);
+          let change = parseFloat(json.prediction) - parseFloat(jsonAggregratedData[0].value);
+          change = (Math.round(change * 100) / 100).toFixed(2); //**** */
+          var diffPercentage = (parseFloat(json.prediction) * 100) / parseFloat(jsonAggregratedData[0].value) - 100;
+
+          d3.select(".company__price"+this.state.symbol).html(`<span>\$${json.prediction}</span>`);
+          d3.select(".company__price-change"+this.state.symbol).html(
+            `<span>\$${change}(${diffPercentage.toFixed(2)}%)</span>`
+          )
+          d3.select("#userUpdated"+this.state.symbol).html(
+            `<span>~thinking~</span>`
+          )
+
+          var el = document.getElementById('userUpdated'+this.state.symbol);
+          el.style.animation = 'none';
+          el.offsetHeight; /* trigger reflow */
+          el.style.animation = null;
+
+          let floatCurrentPrice = parseFloat(this.state.currentPrice.split("$")[1]);
+          let floatPreditionPrice = parseFloat(json.prediction);
+          let error = (floatPreditionPrice - floatCurrentPrice)/floatCurrentPrice;
+
+          this.setState({
+            newData: jsonAggregratedData,
+             isGainer: jsonData.value > lastValue.value,
+             positiveSentiment: (parseFloat(json.posValue)*100).toString()+"%",
+             negativeSentiment: (parseFloat(json.negValue)*100).toString()+"%",
+             neutralSentiment: (parseFloat(json.neuValue)*100).toString()+"%",
+             currentError: (((error*100).toFixed(2)).toString())+"%"});
+
+      });
+    });
+
+
+    socket.on("think$"+this.props.symbol.toLowerCase(), data => {
+      console.log("Sup");
+
+      console.log(data);
+
+      let neu = (parseFloat(data.neuValue)).toFixed(3);
+      let neg = (parseFloat(data.negValue)).toFixed(3);
+      let pos = (parseFloat(data.posValue)).toFixed(3);
+      ////// PLEASE ABSTRACT THIS OUT BRO
+      fetch('/api/david/v0.00.00/stock/predict/$'+this.props.symbol.toUpperCase()+'?neu='+neu+'&neg='+neg+'&pos='+pos+'&type='+this.state.type).then(results => {
+          return results;
+      }).then(data => {
+          return data.json();
+      }).then(json => {
+          let jsonAggregratedData = this.state.newData;
+          let lastValue = jsonAggregratedData[jsonAggregratedData.length - 2];
+          let jsonData = {};
+          jsonData["date"] = Date.parse(json.nextTradingDate);
+          jsonData["dateString"] = json.nextTradingDate;
+          jsonData["value"] = parseFloat(json.prediction);
+          jsonAggregratedData[jsonAggregratedData.length - 1] = jsonData;
+
+          console.log(jsonAggregratedData[0]);
+          let change = parseFloat(json.prediction) - parseFloat(jsonAggregratedData[0].value);
+          change = (Math.round(change * 100) / 100).toFixed(2); //**** */
+          var diffPercentage = (parseFloat(json.prediction) * 100) / parseFloat(jsonAggregratedData[0].value) - 100;
+
+          d3.select(".company__price"+this.state.symbol).html(`<span>\$${json.prediction}</span>`);
+          d3.select(".company__price-change"+this.state.symbol).html(
+            `<span>\$${change}(${diffPercentage.toFixed(2)}%)</span>`
+          )
+          d3.select("#userUpdated"+this.state.symbol).html(
+            `<span>~thinking~</span>`
+          )
+
+          var el = document.getElementById('userUpdated'+this.state.symbol);
+          el.style.animation = 'none';
+          el.offsetHeight; /* trigger reflow */
+          el.style.animation = null;
+
+          let floatCurrentPrice = parseFloat(this.state.currentPrice.split("$")[1]);
+          let floatPreditionPrice = parseFloat(json.prediction);
+          let error = (floatPreditionPrice - floatCurrentPrice)/floatCurrentPrice;
+
+          this.setState({
+            newData: jsonAggregratedData,
+             isGainer: jsonData.value > lastValue.value,
+             positiveSentiment: (parseFloat(json.posValue)*100).toString()+"%",
+             negativeSentiment: (parseFloat(json.negValue)*100).toString()+"%",
+             neutralSentiment: (parseFloat(json.neuValue)*100).toString()+"%",
+             currentError: (((error*100).toFixed(2)).toString())+"%"});
+
+      });
     });
   }
 
@@ -101,13 +235,26 @@ class GraphEntity extends React.Component {
       let jsonData = {};
       jsonData["date"] = Date.parse(nextProps.data[item].Date);
       jsonData["dateString"] = nextProps.data[item].Date;
-      jsonData["value"] = parseFloat(nextProps.data[item].Close);
+      jsonData["value"] = parseFloat(this.stockAttr(nextProps.data[item]));
       jsonAggregratedData.push(jsonData);
     }
 
+    let today = new Date();
+    let dd = today.getDate();
+    let mm = today.getMonth()+1;
+    let yyyy = today.getFullYear();
+
+
+    let currentPrice = parseFloat(jsonAggregratedData[jsonAggregratedData.length - 1].value);
+    let lastPrice = parseFloat(jsonAggregratedData[jsonAggregratedData.length - 2].value);
+    if(jsonAggregratedData[jsonAggregratedData.length - 1].dateString == yyyy+'-'+mm+'-'+dd) {
+      jsonAggregratedData.pop();
+    }
+
+
     d3.select(".company__title"+nextProps.symbol).html(`<span>\$${nextProps.symbol}</span>`);
 
-    fetch('/api/david/v0.00.00/stock/predict/$'+nextProps.symbol.toUpperCase()+'?neu=0.5&neg=0.25&pos=0.25&type=close').then(results => {
+    fetch('/api/david/v0.00.00/stock/predict/$'+nextProps.symbol.toUpperCase()+'?neu=0.5&neg=0.25&pos=0.25&type='+this.state.type).then(results => {
         return results;
     }).then(data => {
         return data.json();
@@ -119,11 +266,6 @@ class GraphEntity extends React.Component {
         jsonData["dateString"] = json.nextTradingDate;
         jsonData["value"] = parseFloat(json.prediction);
         jsonAggregratedData.push(jsonData);
-
-        console.log(nextProps.symbol);
-        console.log(json.posValue);
-        console.log(json.neuValue);
-        console.log(json.negValue);
 
         // d3.select(".positive_sentiment"+this.state.symbol).html(
         //   `<span>${parseFloat(json.posValue)*100}%</span>`
@@ -137,6 +279,9 @@ class GraphEntity extends React.Component {
         //   `<span>${parseFloat(json.neuValue)*100}%</span>`
         // );
 
+        let floatCurrentPrice = parseFloat(currentPrice);
+        let floatPreditionPrice = parseFloat(json.prediction);
+        let error = (floatPreditionPrice - floatCurrentPrice)/floatCurrentPrice;
 
         this.setState({
           width: resizedWidth,
@@ -146,9 +291,30 @@ class GraphEntity extends React.Component {
               isGainer: jsonData.value > lastValue.value,
               positiveSentiment: (parseFloat(json.posValue)*100).toString()+"%",
               negativeSentiment: (parseFloat(json.negValue)*100).toString()+"%",
-              neutralSentiment: (parseFloat(json.neuValue)*100).toString()+"%"});
+              neutralSentiment: (parseFloat(json.neuValue)*100).toString()+"%",
+              currentPrice: "$"+currentPrice.toString(),
+              currentError: (((error*100).toFixed(3)).toString())+"%",
+              lastPrice: "$"+lastPrice.toString(),
+              isPastGainer: currentPrice > lastValue.value,
+              daysTrained: json.daysTrained});
 
     });
+
+  }
+
+  stockAttr(data) {
+    switch (this.state.type) {
+      case "close":
+        return data.Close;
+        case "open":
+          return data.Open;
+          case "high":
+            return data.High;
+            case "low":
+              return data.Low;
+              case "volume":
+                return data.Volume;
+    }
   }
 
   componentDidUpdate() {
@@ -176,7 +342,10 @@ class GraphEntity extends React.Component {
         </div>
         <div className={"company__price"+`${this.state.symbol}`+" graphPrice courierSemiLarge"}>
         </div>
-        <div className={"company__price-change"+`${this.state.symbol}`+" graphPriceChange courierSemiLarge"}>
+        <div className={"company__price-change"+`${this.state.symbol}`+" graphPriceChange courierMedium"}>
+        </div>
+        <div className={"daysTrained"+`${this.state.symbol}`+" graphDaysTrained courierMedium"}>
+          days trained: { this.state.daysTrained }
         </div>
       </div>
       <div className="sentimentMetadata">
@@ -203,7 +372,20 @@ class GraphEntity extends React.Component {
         </div>
       </div>
 
+      <div className= "backtestSuperContainer">
+        <div className="actualsLabels">
+          <span>actuals:</span>
+        </div>
+        <div className= "backtest">
+          <span id={"currentPrice"+`${this.state.symbol}`} className="currentPrice courierMedium"> live: <span className= {`${this.state.isPastGainer ? "isGainerText" : "isLoserText"}`}>{this.state.currentPrice}</span> :: last: { this.state.lastPrice } </span>
+          <div className="backTestContainer">
+            <span id={"currentError"+`${this.state.symbol}`}  className="currentError courierSmall"> error: {this.state.currentError} </span>
+            <div className="liveBacktestIndicatorContainer">
 
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     )
   }

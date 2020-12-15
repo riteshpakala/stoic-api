@@ -6,6 +6,17 @@ const fetch = require('node-fetch');
 const csvtojson = require('csvtojson');
 var bodyParser = require('body-parser');
 const socketIo = require("socket.io");
+var axios = require("axios").default;
+var Twit = require('twit')
+
+var T = new Twit({
+  consumer_key:         'YfotrHzdTUfA1swS0MQj3cqdg',
+  consumer_secret:      'BrCZ67oKoROeZJUPJ46bEqj8kNrJVE2MtHJDwrprMclpRqtDTE',
+  access_token:         '1243717647356661760-fbtO5XfEMB4Vci6nIxkx8xErwQngEy',
+  access_token_secret:  'ZSnUWusM2ozp2obOvbmRS5P96vpM1tZ8tbfXpHUYphSGN'
+  // timeout_ms:           60*10,  // optional HTTP request timeout to apply to all requests.
+  // strictSSL:            false,     // optional - requires SSL certificates to be valid.
+})
 
 var forceSsl = function (req, res, next) {
    if (req.headers['x-forwarded-proto'] !== 'https') {
@@ -176,6 +187,126 @@ app.post('/api/david/v0.00.00/stock/predict', function(req, res) {
   console.log(req.body);
   io.sockets.emit("hello", req.body);
    res.send();
+});
+
+app.post('/api/david/v0.00.00/stock/backtest', function(req, res) {
+  // res.sendFile(path.join(__dirname, '../privacy_policy.pdf'), function(err) {
+  //   if (err) {
+  //     res.status(500).send(err)
+  //   }
+  // })
+  io.sockets.emit("world", req.body);
+   res.send();
+});
+
+
+app.post('/api/david/v0.00.00/stock/think', function(req, res) {
+  // res.sendFile(path.join(__dirname, '../privacy_policy.pdf'), function(err) {
+  //   if (err) {
+  //     res.status(500).send(err)
+  //   }
+  // })
+
+  console.log(req.body.data.symbol);
+  let symbol = req.body.data.symbol.replace(/\s/g, "");
+  let today = new Date();
+  let dd = today.getDate();
+  let mm = today.getMonth()+1;
+  let yyyy = today.getFullYear();
+  let date = yyyy+'-'+mm+'-'+dd;
+
+  T.get('search/tweets', { q: symbol+' since:'+date, count: 100 }, function(err, data, response) {
+
+    axios
+        .get('http://localhost:8080/predict/think', {
+          data : {
+            tweet_data: data
+          }
+        })
+        .then(json => {
+          io.sockets.emit("think"+symbol, json.data);
+          res.send(json.data);
+        })
+        .catch(error => {
+          console.error(error)
+        });
+
+  });
+});
+
+app.post('/api/david/v0.00.00/stock/neutral', function(req, res) {
+  // res.sendFile(path.join(__dirname, '../privacy_policy.pdf'), function(err) {
+  //   if (err) {
+  //     res.status(500).send(err)
+  //   }
+  // })
+
+  console.log(req.body.data.symbol);
+  console.log("Test");
+  let symbol = req.body.data.symbol.replace(/\s/g, "");
+  io.sockets.emit("neutral"+symbol, req.body.data);
+  res.send();
+});
+
+app.get("/api/david/v0.00.00/stock/price/:id", function(req, res) {
+    let stock = req.params.id;
+
+    // var options = {
+    //   method: 'GET',
+    //   url: 'https://twelve-data1.p.rapidapi.com/price',
+    //   params: {symbol: stock, outputsize: '30', format: 'json'},
+    //   headers: {
+    //     'x-rapidapi-key': '0c0e4882d8mshff3f1b457562c64p12c681jsn48b2eeb37946',
+    //     'x-rapidapi-host': 'twelve-data1.p.rapidapi.com'
+    //   }
+    // };
+    //
+    // axios.request(options).then(function (response) {
+    // 	console.log(response.data);
+    //   res.send(response.data);
+    // }).catch(function (error) {
+    // 	console.error(error);
+    // });
+
+    let todaysDate = new Date();
+    let last30Days = new Date();
+    last30Days.setDate(todaysDate.getDate()-1);
+
+    let tDate_Epoch = (Math.floor((todaysDate.getTime()-last30Days.getMilliseconds())/1000)).toString();
+    let l30Date_Epoch = (Math.floor((last30Days.getTime()-last30Days.getMilliseconds())/1000)).toString();
+
+    let urlPrefix = "https://query1.finance.yahoo.com/v7/finance/download/";
+    let urlSymbol = stock+"?period1="+l30Date_Epoch+"&period2="+tDate_Epoch;
+    let urlInteval = "&interval=1d&events=history";
+
+    let fullURL = urlPrefix+urlSymbol+urlInteval;
+    fetch(fullURL)
+      .then(res => res.text() )
+      .then(text => {
+          csvtojson({
+              noheader: false,
+              output: "json"
+            })
+            .fromString(text)
+            .then((jsonObj) => {
+
+                res.send(jsonObj);
+            })
+      });
+
+/*
+
+≈
+                  .fromFile(res)
+                  .then((jsonObj)=>{
+
+                      console.log(jsonObj);
+
+                      return(jsonObj);
+                  })
+
+
+*/
 });
 
 app.get('/terms', function(req, res) {

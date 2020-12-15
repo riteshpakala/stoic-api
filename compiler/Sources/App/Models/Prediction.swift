@@ -34,3 +34,18 @@ final class Prediction: Content {
         self.neuValue = neuValue
     }
 }
+
+final class Sentiment: Content {
+    static let schema = "sentiment"
+    
+    let posValue: String
+    let negValue: String
+    let neuValue: String
+    
+    init(posValue: String = "", negValue: String = "", neuValue: String = "") {
+        
+        self.posValue = posValue
+        self.negValue = negValue
+        self.neuValue = neuValue
+    }
+}
