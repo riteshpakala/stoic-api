@@ -156,12 +156,12 @@ client.on('chat', (channel, user, message, self) => {
         client.action('stoic_nyc', `${user['display-name']} here: https://stoic.nyc`);
         break;
       case '!commands':
-        client.action('stoic_nyc', `${user['display-name']} [$TICKER] [POS]/[NEG]/[NEU]`);
+        client.action('stoic_nyc', `${user['display-name']} [$TICKER] [POS]/[NEG]/[NEU] //:: !think [$TICKER] //:: !stoic [$TICKER] //:: !website //:: !twitter //:: !discord`);
         break;
       case '!discord':
         client.action('stoic_nyc', `${user['display-name']} found it: https://discord.gg/VFfE8PT`);
         break;
-      case '!backtest':
+      case '!backtest', '!update':
       client.action('stoic_nyc', "backtesting each stock & updating the realtime error");
       axios
         .post('http://localhost:8000/api/david/v0.00.00/stock/backtest')

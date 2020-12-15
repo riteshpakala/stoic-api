@@ -224,6 +224,7 @@ app.post('/api/david/v0.00.00/stock/think', function(req, res) {
           }
         })
         .then(json => {
+          console.log("emitting a think"+symbol);
           io.sockets.emit("think"+symbol, json.data);
           res.send(json.data);
         })
@@ -347,7 +348,7 @@ const http = require('http').Server(app);
 
 const io = require('socket.io')(http, {
   cors: {
-    origin: "http://192.168.1.39:8001",
+    origin: "http://192.168.1.39:8001",//dumb
     methods: ["GET", "POST"]
   }
 });

@@ -26,7 +26,7 @@ class GraphEntity extends React.Component {
       positiveSentiment: "0%",
       negativeSentiment: "0%",
       neutralSentiment: "0%",
-      currentPrice: "$0000.00",
+      currentPrice: "$000.00",
       currentError: "0%",
       type: "close",
       daysTrained: 0};
