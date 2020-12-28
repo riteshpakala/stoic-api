@@ -23,8 +23,8 @@ let options = {
     reconnect: true
   },
   identity: {
-    username: "SenecaStoic",
-    password: "oauth:4qz3do71pz9s5lke6kytbvmcb8ophk"
+    username: "SenecaBot",
+    password: "oauth:7ygae8bcokv5rivh3j1efo4czlphwx"
   },
     channels: ["stoic_nyc"]
 };
@@ -66,7 +66,7 @@ client.on('chat', (channel, user, message, self) => {
               let neg = ((parseFloat(res.data.negValue)).toFixed(3)*100).toString()+"%";
               let pos = ((parseFloat(res.data.posValue)).toFixed(3)*100).toString()+"%";
 
-              client.action('stoic_nyc', "discovered & updated this sentiment summary //:: neutral: "+neu+" - negative: "+neg+" - positive: "+pos+" //:: for: "+match+" //:: sentiment engine: david.v00.00.10");
+              // client.action('stoic_nyc', "discovered & updated this sentiment summary //:: neutral: "+neu+" - negative: "+neg+" - positive: "+pos+" //:: for: "+match+" //:: sentiment engine: david.v00.00.10");
             })
             .catch(error => {
               console.error(error)
@@ -156,10 +156,19 @@ client.on('chat', (channel, user, message, self) => {
         client.action('stoic_nyc', `${user['display-name']} here: https://stoic.nyc`);
         break;
       case '!commands':
-        client.action('stoic_nyc', `${user['display-name']} [$TICKER] [POS]/[NEG]/[NEU] //:: !think [$TICKER] //:: !stoic [$TICKER] //:: !website //:: !twitter //:: !discord`);
+        client.action('stoic_nyc', `${user['display-name']} here are the commands`);
+        client.action('stoic_nyc', `//:: Trading Floor Commands`);
+        client.action('stoic_nyc', `[$TICKER] [POS]/[NEG]/[NEU] // $msft 0.5/0.0/0.25 tests a specific sentiment on microsoft`);
+        client.action('stoic_nyc', `!think [$TICKER] // !think $msft aggregates sentiment from the internet using * stoic's api/engine`);
+        client.action('stoic_nyc', `!stoic [$TICKER] // !stoic $msft applies * stoic's time-series model only, w/o sentiment`);
+        client.action('stoic_nyc', `//:: General Commands`);
+        client.action('stoic_nyc', `!website // !twitter // !discord`);
+
+
+
         break;
       case '!discord':
-        client.action('stoic_nyc', `${user['display-name']} found it: https://discord.gg/VFfE8PT`);
+        client.action('stoic_nyc', `${user['display-name']} found it: https://discord.gg/8atp8Y3E4A`);
         break;
       case '!backtest', '!update':
       client.action('stoic_nyc', "backtesting each stock & updating the realtime error");

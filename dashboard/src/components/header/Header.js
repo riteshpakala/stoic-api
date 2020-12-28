@@ -12,7 +12,7 @@ class Header extends React.Component {
 
   componentDidMount() {
     let today = new Date();
-    let dd = 15;// today.getDate()+(this.props.isReady ? 1 : 0);
+    let dd = 23;// today.getDate()+(this.props.isReady ? 1 : 0);
     let mm = today.getMonth()+1;
     let yyyy = today.getFullYear();
     let date = yyyy+'-'+mm+'-'+dd;

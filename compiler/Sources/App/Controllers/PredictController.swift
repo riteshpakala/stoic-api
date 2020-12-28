@@ -170,7 +170,7 @@ struct PredictController: RouteCollection {
         //Get the highest trained model
         let targets = service.models.filter({ $0.symbol ==  symbol })
         //get the most trained model for now....
-        let sorted = targets.sorted(by: { Int($0.metadata.metadata?["daysTrained"] ?? "0") ?? 0 > Int($1.metadata.metadata?["daysTrained"] ?? "0") ?? 0 })
+        let sorted = targets.sorted(by: { Int($0.metadata.metadata?["daysTrained"] ?? "0") ?? 0 < Int($1.metadata.metadata?["daysTrained"] ?? "0") ?? 0 })
         if let model = sorted.first {
             
             promise.completeWith(.init(catching: { () -> Prediction in

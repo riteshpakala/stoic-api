@@ -48,7 +48,7 @@ class TheView extends React.Component {
           count={4}
           width={window.innerWidth*this.props.widthRatio}/>
         <Graph
-          symbol="goog"
+          symbol="pfe"
           count={4}
           width={window.innerWidth*this.props.widthRatio}/>
         <Graph

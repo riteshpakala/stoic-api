@@ -102,6 +102,7 @@ app.get("/api/david/v0.00.00/stock/:id", function(req, res) {
     let stock = req.params.id;
 
     let todaysDate = new Date();
+    // todaysDate.setDate(todaysDate.getDate()-1);
     let last30Days = new Date();
     last30Days.setDate(todaysDate.getDate()-30);
 
@@ -225,7 +226,7 @@ app.post('/api/david/v0.00.00/stock/think', function(req, res) {
         })
         .then(json => {
           console.log("emitting a think"+symbol);
-          io.sockets.emit("think"+symbol, json.data);
+          io.sockets.emit("think"+symbol.toLowerCase(), json.data);
           res.send(json.data);
         })
         .catch(error => {
@@ -245,7 +246,7 @@ app.post('/api/david/v0.00.00/stock/neutral', function(req, res) {
   console.log(req.body.data.symbol);
   console.log("Test");
   let symbol = req.body.data.symbol.replace(/\s/g, "");
-  io.sockets.emit("neutral"+symbol, req.body.data);
+  io.sockets.emit("neutral"+symbol.toLowerCase(), req.body.data);
   res.send();
 });
 
@@ -273,7 +274,7 @@ app.get("/api/david/v0.00.00/stock/price/:id", function(req, res) {
     let last30Days = new Date();
     last30Days.setDate(todaysDate.getDate()-1);
 
-    let tDate_Epoch = (Math.floor((todaysDate.getTime()-last30Days.getMilliseconds())/1000)).toString();
+    let tDate_Epoch = (Math.floor((todaysDate.getTime()-todaysDate.getMilliseconds())/1000)).toString();
     let l30Date_Epoch = (Math.floor((last30Days.getTime()-last30Days.getMilliseconds())/1000)).toString();
 
     let urlPrefix = "https://query1.finance.yahoo.com/v7/finance/download/";
@@ -348,7 +349,7 @@ const http = require('http').Server(app);
 
 const io = require('socket.io')(http, {
   cors: {
-    origin: "http://192.168.1.39:8001",//dumb
+    origin: "http://192.168.1.35:8001",//dumb
     methods: ["GET", "POST"]
   }
 });
