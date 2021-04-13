@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import Accelerate
 
 public enum SVMKernalType   //  SVM kernal type
 {
@@ -104,17 +103,22 @@ class Kernel {
         return QDiagonal
     }
     
+    static func dprod(a: [Double], b: [Double]) -> Double {
+        return zip(a, b).map(*).reduce(0, +)
+    }
+    
     class func calcKernelValue(parameters: KernelParameters, x: [Double], y: [Double]) ->Double
     {
         switch (parameters.type) {
         case .Linear:
             var sum = 0.0
-            vDSP_dotprD(x, 1, y, 1, &sum, vDSP_Length(x.count))
+            
+//            vDSP_dotprD(x, 1, y, 1, &sum, vDSP_Length(x.count))
             return sum
             
         case .Polynomial:
-            var sum = 0.0
-            vDSP_dotprD(x, 1, y, 1, &sum, vDSP_Length(x.count))
+            var sum = dprod(a: x, b: y)//0.0
+//            vDSP_dotprD(x, 1, y, 1, &sum, vDSP_Length(x.count))
             var tmp = parameters.gamma * sum + parameters.coef0
             var ret = 1.0
             
@@ -132,15 +136,15 @@ class Kernel {
             
         case .RadialBasisFunction:
             var diff = [Double].init(repeating: 0.0, count: x.count)
-            vDSP_vsubD(x, 1, y, 1, &diff, 1, vDSP_Length(x.count))
+//            vDSP_vsubD(x, 1, y, 1, &diff, 1, vDSP_Length(x.count))
             var sum = 0.0
-            vDSP_dotprD(diff, 1, diff, 1, &sum, vDSP_Length(x.count))
+//            vDSP_dotprD(diff, 1, diff, 1, &sum, vDSP_Length(x.count))
             
             return exp(-parameters.gamma * sum)
             
         case .Sigmoid:
             var sum = 0.0
-            vDSP_dotprD(x, 1, y, 1, &sum, vDSP_Length(x.count))
+//            vDSP_dotprD(x, 1, y, 1, &sum, vDSP_Length(x.count))
             return tanh(parameters.gamma * sum + parameters.coef0)
             
         case .Precomputed:
@@ -151,8 +155,8 @@ class Kernel {
     
     func dotProduct(vector1Index : Int, _ vector2Index : Int) -> Double
     {
-        var sum = 0.0
-        vDSP_dotprD(problemData.inputs[vector1Index], 1, problemData.inputs[vector2Index], 1, &sum, vDSP_Length(problemData.inputDimension))
+        var sum = Kernel.dprod(a: problemData.inputs[vector1Index], b: problemData.inputs[vector2Index])
+//        vDSP_dotprD(problemData.inputs[vector1Index], 1, problemData.inputs[vector2Index], 1, &sum, vDSP_Length(problemData.inputDimension))
         
         return sum
     }
