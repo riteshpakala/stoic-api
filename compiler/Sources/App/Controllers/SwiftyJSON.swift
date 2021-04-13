@@ -1197,7 +1197,7 @@ public func > (lhs: JSON, rhs: JSON) -> Bool {
 public func < (lhs: JSON, rhs: JSON) -> Bool {
 
     switch (lhs.type, rhs.type) {
-    case (.number, .number): return lhs.rawNumber < rhs.rawNumber
+    case (.number, .number): return compareNSNumber(lhs.rawNumber, rhs.rawNumber)
     case (.string, .string): return lhs.rawString < rhs.rawString
     default:                 return false
     }
@@ -1233,14 +1233,22 @@ func != (lhs: NSNumber, rhs: NSNumber) -> Bool {
     return !(lhs == rhs)
 }
 
-func < (lhs: NSNumber, rhs: NSNumber) -> Bool {
 
+func compareNSNumber(_ lhs: NSNumber,_ rhs: NSNumber) -> Bool {
     switch (lhs.isBool, rhs.isBool) {
     case (false, true): return false
     case (true, false): return false
     default:            return lhs.compare(rhs) == .orderedAscending
     }
 }
+//func < (lhs: NSNumber, rhs: NSNumber) -> Bool {
+//
+//    switch (lhs.isBool, rhs.isBool) {
+//    case (false, true): return false
+//    case (true, false): return false
+//    default:            return lhs.compare(rhs) == .orderedAscending
+//    }
+//}
 
 func > (lhs: NSNumber, rhs: NSNumber) -> Bool {
 

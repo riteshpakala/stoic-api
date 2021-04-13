@@ -37,17 +37,15 @@ struct ThinkController: RouteCollection {
         if let body = req.body.string {
             do {
                 if let data = body.data(using: .utf8) {
-                    try autoreleasepool {
-                        let securities = try JSONDecoder().decode(Securities.self, from: data)
-                        
-                        //let indicators = Indicators.init(with: securities.data)
-                        //print(securities.data.count)
-                        let result = ThinkController.compilePrediction(securities: securities.data)
-                        
-                        promise.completeWith(.init(catching: {
-                            result
-                        }))
-                    }
+                    let securities = try JSONDecoder().decode(Securities.self, from: data)
+                    
+                    //let indicators = Indicators.init(with: securities.data)
+                    //print(securities.data.count)
+                    let result = ThinkController.compilePrediction(securities: securities.data)
+                    
+                    promise.completeWith(.init(catching: {
+                        result
+                    }))
                 }
             } catch let error {
                 print(error)

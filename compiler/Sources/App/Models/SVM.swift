@@ -179,47 +179,47 @@ public class SVMModel: Codable, Equatable {
         let dictionary : Dictionary = pList as! Dictionary<String, AnyObject>
         
         //  Get the training results from the dictionary
-        let typeValue = dictionary["type"] as? NSInteger
+        let typeValue = dictionary["type"] as? Int
         if typeValue == nil {type = .C_SVM_Classification; return nil }
         let testType = SVMType(rawValue: typeValue!)
         if testType == nil {type = .C_SVM_Classification; return nil }
         type = testType!
         
-        let numClassValue = dictionary["numClasses"] as? NSInteger
+        let numClassValue = dictionary["numClasses"] as? Int
         if numClassValue == nil { return nil }
         numClasses = numClassValue!
         
-        let labelArray = dictionary["labels"] as? NSArray
+        let labelArray = dictionary["labels"] as? [Int]
         if labelArray == nil { return nil }
-        labels = labelArray! as! [Int]
+        labels = labelArray!
         
-        let rhoArray = dictionary["ρ"] as? NSArray
+        let rhoArray = dictionary["ρ"] as? [Double]
         if rhoArray == nil { return nil }
-        ρ = rhoArray! as! [Double]
+        ρ = rhoArray!
         
-        let totalSVValue = dictionary["totalSupportVectors"] as? NSInteger
+        let totalSVValue = dictionary["totalSupportVectors"] as? Int
         if totalSVValue == nil { return nil }
         totalSupportVectors = totalSVValue!
         
-        let svCountArray = dictionary["supportVectorCount"] as? NSArray
+        let svCountArray = dictionary["supportVectorCount"] as? [Int]
         if svCountArray == nil { return nil }
-        supportVectorCount = svCountArray! as! [Int]
+        supportVectorCount = svCountArray!
         
-        let svArray = dictionary["supportVector"] as? NSArray
+        let svArray = dictionary["supportVector"] as? [[Double]]
         if svArray == nil { return nil }
-        supportVector = svArray! as! [[Double]]
+        supportVector = svArray!
         
-        let coeffArray = dictionary["coefficients"] as? NSArray
+        let coeffArray = dictionary["coefficients"] as? [[Double]]
         if coeffArray == nil { return nil }
-        coefficients = coeffArray! as! [[Double]]
+        coefficients = coeffArray!
         
-        let probAArray = dictionary["probabilityA"] as? NSArray
+        let probAArray = dictionary["probabilityA"] as? [Double]
         if probAArray == nil { return nil }
-        probabilityA = probAArray! as! [Double]
+        probabilityA = probAArray!
         
-        let probBArray = dictionary["probabilityB"] as? NSArray
+        let probBArray = dictionary["probabilityB"] as? [Double]
         if probBArray == nil { return nil }
-        probabilityB = probBArray! as! [Double]
+        probabilityB = probBArray!
     }
     
     public func isνFeasableForData(data: DataSet) -> Bool
@@ -533,7 +533,7 @@ public class SVMModel: Codable, Equatable {
                 var shuffledIndices = classificationData.classOffsets
                 for c in 0..<classificationData.numClasses {
                     for i in 0..<classificationData.classCount[c] {
-                        let j =  i + Int(arc4random()) % (classificationData.classCount[c] - i)
+                        let j =  i + Int.random(in: 0..<(classificationData.classCount[c] - i))//Int(arc4random()) % (classificationData.classCount[c] - i)
                         shuffledIndices[c].swapAt(i, j)
                     }
                 }

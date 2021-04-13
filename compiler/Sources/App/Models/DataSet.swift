@@ -227,7 +227,7 @@ public class DataSet: Codable {
         
         //  Shuffle
         for i in 0..<inputs.count - 1 {
-            let j = Int(arc4random_uniform(UInt32(inputs.count - i))) + i
+            let j = Int.random(in: 0..<inputs.count - i) + i//Int(arc4random_uniform(UInt32(inputs.count - i))) + i
             guard i != j else { continue }
             shuffledArray.swapAt(i, j)
         }
