@@ -1,0 +1,39 @@
+.header{
+    /* margin-top: 20px;
+    width: 60vw;
+    height: 100px; */
+    position: absolute;
+    width: 100vw;
+    height: 75px;
+    top: 12px;
+    left: 0;
+  
+    background-color: transparent;
+    /* display: flex;
+    justify-content: center; */
+    z-index: 12;
+}
+
+.header p {
+    padding: 0;
+    margin: 0;
+}
+
+.header a {
+    padding: 0;
+    text-decoration: none;
+}
+
+.headerTitleContainer {
+    height: 100%;
+    width: auto;
+    float: left;
+    text-align: left;
+}
+
+.headerDetailsContainer {
+    height: 100%;
+    width: auto;
+    float: right;
+    text-align: right;
+}

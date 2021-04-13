@@ -349,7 +349,7 @@ const http = require('http').Server(app);
 
 const io = require('socket.io')(http, {
   cors: {
-    origin: "http://192.168.1.35:8001",//dumb
+    origin: "http://192.168.1.29:8001",//dumb
     methods: ["GET", "POST"]
   }
 });

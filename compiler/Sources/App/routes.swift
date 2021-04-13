@@ -8,5 +8,5 @@ func routes(_ app: Application) throws {
         return "It works!"
     }
 
-    try app.register(collection: PredictController(loopGroup: app.eventLoopGroup, backend: app.backend))
+    try app.register(collection: ThinkController(loopGroup: app.eventLoopGroup))
 }

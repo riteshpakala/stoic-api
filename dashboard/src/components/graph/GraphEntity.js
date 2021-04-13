@@ -5,7 +5,7 @@ import './style.css';
 import '../../constants/GlobalStyle.css';
 import * as d3 from "d3";
 import socketIOClient from "socket.io-client";
-const ENDPOINT = "http://192.168.1.35:8000/";
+const ENDPOINT = "http://192.168.1.29:8000/";
 
 class GraphEntity extends React.Component {
 

@@ -1,0 +1,44 @@
+
+/*
+
+
+public struct Colors {
+    static let green: UIColor = UIColor(hex: "#39FF14")
+    static let black: UIColor = UIColor(hex: "#121212")
+    static let purple: UIColor = UIColor(hex: "#EC6CFF")
+    static let yellow: UIColor = UIColor(hex: "#ECE300")
+    static let orange: UIColor = UIColor(hex: "#FFCD00")
+    static let blue: UIColor = UIColor(hex: "#00FFFD")
+    static let red: UIColor = UIColor(hex: "#AA1313")
+    static let marbleBrown: UIColor = UIColor(hex: "#786E5D")
+    static let graniteGray: UIColor = UIColor(hex: "#808080")
+
+}
+
+
+*/
+
+.basicButton {
+  width: 48px;
+  height: 24px;
+  border-radius: 4px;
+  background-color: #EC6CFF;
+  position: fixed;
+  bottom: 20px;
+  left: 16px;
+  z-index: 16;
+  text-align: center;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  /* cursor: pointer; */
+  /* pointer-events: none; */
+}
+
+.basicButton p {
+  width: 100%;
+}
+
+.hide {
+  display: none;
+}

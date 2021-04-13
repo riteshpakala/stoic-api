@@ -68,8 +68,6 @@ class Graph extends React.Component {
   }
 
   render() {
-
-
       if(this.state.data.length === this.state.siphonSymbols.length) {
 
         return (<div className="graphContainer">
