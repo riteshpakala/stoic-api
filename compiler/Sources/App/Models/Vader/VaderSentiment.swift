@@ -8,7 +8,6 @@
 
 import Foundation
 import Vapor
-import DirectoryService
 
 public class VaderSentimentOutput: NSObject, Codable, NSCoding, NSSecureCoding {
     public static var supportsSecureCoding: Bool = true
