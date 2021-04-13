@@ -11,7 +11,6 @@ import Vapor
 import Core
 import Storage
 import Datastore
-import CoreML
 
 struct ThinkController: RouteCollection {
     let loopGroup: EventLoopGroup
