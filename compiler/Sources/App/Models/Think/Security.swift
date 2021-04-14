@@ -33,18 +33,21 @@ final class SecurityResult: Content {
     let errors: NodeError
     let dataSizes: [Int]
     let daysPages: [[String: Int]]
+    let chart: Chart
     
     init(result: [SecurityPredictionResult],
          graph: SecurityNodeGraph,
          errors: NodeError,
          dataSizes: [Int],
-         daysPages: [[String: Int]]) {
+         daysPages: [[String: Int]],
+         chart: Chart) {
         
         self.result = result
         self.graph = graph
         self.errors = errors
         self.dataSizes = dataSizes
         self.daysPages = daysPages
+        self.chart = chart
     }
 }
 

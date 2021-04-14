@@ -54,8 +54,8 @@ struct ThinkController: RouteCollection {
     }
     
     public static func compilePrediction(securities: [Security]) -> SecurityResult {
-        let minDays: Int = 4
-        let maxDays: Int = 28
+        let minDays: Int = Defaults.minDays
+        let maxDays: Int = Defaults.indicatorMaxDays
         
         let indicators: [Indicators.Variant] = [
             .smawa,
@@ -67,21 +67,30 @@ struct ThinkController: RouteCollection {
         
         
         var result: [SecurityPredictionResult] = []
+        var predictionsFlattened: [IndicatorPredictedResult] = []
         for iter in 0..<9 {
 //            let range = minDays...maxDays
-            let dataSize = Int.random(in: minDays...16)
+            let dataSize = Int.random(in: minDays...Defaults.trainingMaxDays)
             
             var predictions: [PredictionResult] = []
+            var lastPred: Double = 0.0
             for variant1 in indicators {
                 
-                print("training: \(variant1) ")
+                let pred = generate(fromQuote: securities,
+                                      dataSize: dataSize,
+                                      indicatorDays: minDays...maxDays,
+                                      indicator1: variant1,
+                                      indicator2: .smawa)
+                predictions.append(pred)
                 
-                predictions.append(generate(fromQuote: securities,
-                                            dataSize: dataSize,
-                                            indicatorDays: minDays...maxDays,
-                                            indicator1: variant1,
-                                            indicator2: .smawa))
+                lastPred = pred.value
+            
             }
+            
+            let predDefault: [IndicatorPredictedResult] = Defaults.indicators.map{ .init(indicator: [.init(title: "\($0)", days: dataSize)], value: lastPred) }
+            //defaults
+            predictionsFlattened.append(contentsOf: predDefault)
+            
             result.append(.init(predictions: predictions, dataSize: dataSize))
         }
         
@@ -97,17 +106,11 @@ struct ThinkController: RouteCollection {
                 for indicator in subItem.indicators {
                     let error = (subItem.value - subItem.comparable.value(forContext: .close)) / subItem.comparable.value(forContext: .close)
                     
-                    let mustHave1: Node = .init(source: "\(Indicators.Variant.volatility)", target: indicator.title)
+                    let nodesDefault: [Node] = Defaults.indicators.map{ .init(source: "\($0)", target: indicator.title) }
                     
-                    let mustHave2: Node = .init(source: "\(Indicators.Variant.momentum)", target: indicator.title)
+                    nodes.append(contentsOf: nodesDefault)
                     
-                    let mustHave3: Node = .init(source: "\(Indicators.Variant.change)", target: indicator.title)
-                    
-                    let mustHave4: Node = .init(source: "\(Indicators.Variant.vwa)", target: indicator.title)
-                    
-                    nodes.append(contentsOf: [mustHave1, mustHave2, mustHave3, mustHave4])
-                    
-                    errors.append(.init(nodes: [mustHave1, mustHave2, mustHave3, mustHave4], error: error))
+                    errors.append(.init(nodes: nodes, error: error))
                     
                     days[indicator.title] = indicator.days
                 }
@@ -135,7 +138,8 @@ struct ThinkController: RouteCollection {
                                   nodes: nodePages),
                      errors: .init(paths: errorPages),
                      dataSizes: dataSizes,
-                     daysPages: daysPages)
+                     daysPages: daysPages,
+                     chart: .init(minX: Defaults.minDays, maxX: Defaults.indicatorMaxDays, labels: Array(colors.keys), data: predictionsFlattened))
     }
     
     
