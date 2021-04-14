@@ -146,7 +146,7 @@ struct ThinkController: RouteCollection {
                                 indicator2: Indicators.Variant) -> PredictionResult {
         let securities = quoteToUse.sortAsc
         
-        let time = CFAbsoluteTimeGetCurrent()
+        let time = Date().timeIntervalSinceNow
         //Securities part of window of days
         
         print("generating tonal model w/o sentiment: \(securities.count) securities discovered")
@@ -196,7 +196,7 @@ struct ThinkController: RouteCollection {
         david.Cost = 1e3
         david.train(data: dataForDavid)
         
-        print("tonal model generation - complete - ✅ - \(CFAbsoluteTimeGetCurrent() - time)")
+        print("tonal model generation - complete - ✅ - \(Date().timeIntervalSinceNow - time)")
         
         let quoteSorted = quoteToUse.sortDesc
         
@@ -219,7 +219,7 @@ struct ThinkController: RouteCollection {
                      days1: days1,
                      days2: days2,
                      value: prediction,
-                     time: CFAbsoluteTimeGetCurrent() - time)
+                     time: Date().timeIntervalSinceNow - time)
     }
     
     public static func predict(model: SVMModel,
