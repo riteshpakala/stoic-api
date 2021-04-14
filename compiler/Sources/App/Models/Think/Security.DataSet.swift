@@ -40,16 +40,16 @@ class SecurityDataSet {
         ]
     }()
     
-    public func asArrayIMBHS(_ daysForEMA: Int, _ daysForSMA: Int) -> ([Double]) {
+    public func asArrayIMBHS(_ variant1: Indicators.Variant, _ variant2: Indicators.Variant, days1: Int, days2: Int, daysO: Int) -> ([Double]) {
         
         
         return ([
-            indicators.emaWA(daysForEMA, context: context),
-            indicators.smaWA(daysForSMA, context: context),
-            indicators.basePair.volatility.volatility,
-            indicators.basePair.volatility.momentum,
-            indicators.basePair.volatility.change,
-            indicators.vwa(),
+            variant1.compute(indicators, context: context, days: days1),
+            variant2.compute(indicators, context: context, days: days2),
+            Indicators.Variant.volatility.compute(indicators, context: context, days: daysO),
+            Indicators.Variant.momentum.compute(indicators, context: context, days: daysO),
+            Indicators.Variant.change.compute(indicators, context: context, days: daysO),
+            Indicators.Variant.vwa.compute(indicators, context: context, days: daysO)
         ])
     }
 
@@ -62,8 +62,8 @@ class SecurityDataSet {
     }
 
     public var output: [Double] {
-        //[security.value(forContext: context)]
-        [ change ]
+        [ security.value(forContext: context) ]
+//        [ change ]
     }
     
     public var asString: String {

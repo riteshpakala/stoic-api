@@ -15,8 +15,6 @@ import Datastore
 struct ThinkController: RouteCollection {
     let loopGroup: EventLoopGroup
     
-    let stoicSentiment: VaderSentiment = .init()
-    
     init(loopGroup: EventLoopGroup) {
         self.loopGroup = loopGroup
 //        service.gcs = backend
@@ -59,21 +57,96 @@ struct ThinkController: RouteCollection {
         let minDays: Int = 4
         let maxDays: Int = 28
         
-        var predictions: [PredictionResult] = []
+        let indicators: [Indicators.Variant] = [
+            .smawa,
+            .emawa,
+            .macd,
+            .stochd,
+            .volchange
+        ]
+        
+        
+        var result: [SecurityPredictionResult] = []
         for iter in 0..<9 {
-            predictions.append(generate(fromQuote: securities, indicatorDays: minDays...maxDays))
+//            let range = minDays...maxDays
+            let dataSize = Int.random(in: minDays...16)
             
+            var predictions: [PredictionResult] = []
+            for variant1 in indicators {
+                
+                print("training: \(variant1) ")
+                
+                predictions.append(generate(fromQuote: securities,
+                                            dataSize: dataSize,
+                                            indicatorDays: minDays...maxDays,
+                                            indicator1: variant1,
+                                            indicator2: .smawa))
+            }
+            result.append(.init(predictions: predictions, dataSize: dataSize))
         }
         
-        return .init(predictions: predictions)
+        var errorPages: [[NodePath]] = []
+        var nodePages: [[Node]] = []
+        var daysPages: [[String: Int]] = []
+        var dataSizes: [Int] = []
+        for item in result {
+            var nodes: [Node] = []
+            var errors: [NodePath] = []
+            var days: [String: Int] = [:]
+            for subItem in item.predictions {
+                for indicator in subItem.indicators {
+                    let error = (subItem.value - subItem.comparable.value(forContext: .close)) / subItem.comparable.value(forContext: .close)
+                    
+                    let mustHave1: Node = .init(source: "\(Indicators.Variant.volatility)", target: indicator.title)
+                    
+                    let mustHave2: Node = .init(source: "\(Indicators.Variant.momentum)", target: indicator.title)
+                    
+                    let mustHave3: Node = .init(source: "\(Indicators.Variant.change)", target: indicator.title)
+                    
+                    let mustHave4: Node = .init(source: "\(Indicators.Variant.vwa)", target: indicator.title)
+                    
+                    nodes.append(contentsOf: [mustHave1, mustHave2, mustHave3, mustHave4])
+                    
+                    errors.append(.init(nodes: [mustHave1, mustHave2, mustHave3, mustHave4], error: error))
+                    
+                    days[indicator.title] = indicator.days
+                }
+            }
+            dataSizes.append(item.dataSize)
+            daysPages.append(days)
+            errorPages.append(errors)
+            nodePages.append(nodes)
+        }
+        
+        let colors: [String: NodeMeta] = [
+            "\(Indicators.Variant.smawa)": .init(label: "SMA Weighted Avg.", color: "#EC6CFF"),
+            "\(Indicators.Variant.emawa)": .init(label: "EMA Weighted Avg.", color: "#FFCD00"),
+            "\(Indicators.Variant.macd)": .init(label: "MacD", color: "#6cb8ff"),
+            "\(Indicators.Variant.stochd)": .init(label: "Stochastic D", color: "#ff896c"),
+            "\(Indicators.Variant.volchange)": .init(label: "Volume Change", color: "#6eff55"),
+            "\(Indicators.Variant.volatility)": .init(label: "Volatility Average", color: "#a19a8e"),
+            "\(Indicators.Variant.momentum)": .init(label: "Momentum", color: "#a19a8e"),
+            "\(Indicators.Variant.change)": .init(label: "Change", color: "#a19a8e"),
+            "\(Indicators.Variant.vwa)": .init(label: "Volume Weighted Avg.", color: "#a19a8e")
+        ]
+        
+        return .init(result: result,
+                     graph: .init(meta: colors,
+                                  nodes: nodePages),
+                     errors: .init(paths: errorPages),
+                     dataSizes: dataSizes,
+                     daysPages: daysPages)
     }
     
     
     public static func generate(fromQuote quoteToUse: [Security],
-                                indicatorDays: ClosedRange<Int>) -> PredictionResult {
+                                dataSize: Int = 30,
+                                indicatorDays: ClosedRange<Int>,
+                                indicator1: Indicators.Variant,
+                                indicator2: Indicators.Variant) -> PredictionResult {
         let securities = quoteToUse.sortAsc
-        let dataSize = 30
         
+        let time = CFAbsoluteTimeGetCurrent()
         //Securities part of window of days
         
         print("generating tonal model w/o sentiment: \(securities.count) securities discovered")
@@ -83,8 +156,9 @@ struct ThinkController: RouteCollection {
             inputDimension: 6,
             outputDimension: 1)
         
-        let daysForEMA = Int.random(in: indicatorDays)
-        let daysForSMA = Int.random(in: indicatorDays)
+        let days1 = Int.random(in: indicatorDays)
+        let days2 = Int.random(in: indicatorDays)
+        
         for index in 0..<dataSize {
             do {
                 //we add a +1 to days, because we are going to predict from the
@@ -95,10 +169,13 @@ struct ThinkController: RouteCollection {
                 let trainable = securities.prefix(upTo: securities.count - (dataSize - index))
                 let dataSet = SecurityDataSet(quote: Array(trainable),
                                               context: .close)
-                print(dataSet.asString)
-                let dataInput = dataSet.asArray
+                
+                let dataInput = dataSet.asArrayIMBHS(indicator1, indicator2, days1: days1, days2: days2, daysO: dataSize)
+                
+//                print(dataSet.indicators.macDAverage(days1, context: .close))
+//                print(dataInput)
                 try dataForDavid.addDataPoint(
-                    input: dataSet.asArrayIMBHS(daysForEMA, daysForSMA),
+                    input: dataInput,
                     output: dataSet.output,
                     label: trainable.last?.dateAsString ?? "\(index)")
                 
@@ -119,18 +196,42 @@ struct ThinkController: RouteCollection {
         david.Cost = 1e3
         david.train(data: dataForDavid)
         
-        print("tonal model generation - complete - ✅")
+        print("tonal model generation - complete - ✅ - \(CFAbsoluteTimeGetCurrent() - time)")
         
-        let prediction = predict(model: david, fromQuote: quoteToUse)
+        let quoteSorted = quoteToUse.sortDesc
         
-        return .init(dataSize: dataSize, daysEMA: daysForEMA, daysSMA: daysForSMA, value: prediction)
+        guard let comparable = quoteSorted.first else {
+            fatalError("failed to get quoteSorted first element")
+        }
+        
+        let prediction = predict(model: david,
+                                 fromQuote: quoteSorted,
+                                 indicator1: indicator1,
+                                 indicator2: indicator2,
+                                 days1,
+                                 days2,
+                                 dataSize)
+//        print(prediction)
+        return .init(comparable: comparable,
+                     dataSize: dataSize,
+                     indicator1: indicator1,
+                     indicator2: indicator2,
+                     days1: days1,
+                     days2: days2,
+                     value: prediction,
+                     time: CFAbsoluteTimeGetCurrent() - time)
     }
     
     public static func predict(model: SVMModel,
-                               fromQuote quote: [Security]) -> Double {
+                               fromQuote quote: [Security],
+                               indicator1: Indicators.Variant,
+                               indicator2: Indicators.Variant,
+                               _ days1: Int,
+                               _ days2: Int,
+                               _ daysO: Int) -> Double {
         
         
-        let securities = Array(quote.sortDesc.suffix(from: 1))
+        let securities = Array(quote.suffix(from: 1))
         
         let dataForDavid: DataSet = DataSet(
             dataType: .Regression,
@@ -142,9 +243,8 @@ struct ThinkController: RouteCollection {
             let dataSet = SecurityDataSet(quote: securities,
                                           context: .close)
             
-            print(dataSet.asString)
             try dataForDavid.addDataPoint(
-                input: dataSet.asArray,
+                input: dataSet.asArrayIMBHS(indicator1, indicator2, days1: days1, days2: days2, daysO: daysO),
                 output: dataSet.output,
                 label: securities.last?.dateAsString ?? "\(index)")
             

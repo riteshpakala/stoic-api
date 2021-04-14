@@ -28,25 +28,101 @@ public struct Securities: Codable {
 final class SecurityResult: Content {
     static let schema = "SecurityResult"
     
-    let predictions: [PredictionResult]
+    let result: [SecurityPredictionResult]
+    let graph: SecurityNodeGraph
+    let errors: NodeError
+    let dataSizes: [Int]
+    let daysPages: [[String: Int]]
     
-    init(predictions: [PredictionResult]) {
+    init(result: [SecurityPredictionResult],
+         graph: SecurityNodeGraph,
+         errors: NodeError,
+         dataSizes: [Int],
+         daysPages: [[String: Int]]) {
+        
+        self.result = result
+        self.graph = graph
+        self.errors = errors
+        self.dataSizes = dataSizes
+        self.daysPages = daysPages
+    }
+}
+
+final class SecurityNodeGraph: Content {
+    static let schema = "SecurityNodeGraph"
+    
+    let meta: [String: NodeMeta]
+    let nodes: [[Node]]
+    
+    init(meta: [String: NodeMeta], nodes: [[Node]]) {
+        self.meta = meta
+        self.nodes = nodes
+    }
+}
+
+final class SecurityPredictionResult: Content {
+    static let schema = "SecurityPredictionResult"
+    
+    let predictions: [PredictionResult]
+    let dataSize: Int
+    
+    init(predictions: [PredictionResult], dataSize: Int) {
         self.predictions = predictions
+        self.dataSize = dataSize
+    }
+}
+
+final class IndicatorResult: Content {
+    static let schema = "IndicatorResult"
+    
+    let title: String
+    let days: Int
+    
+    init(title: String, days: Int) {
+        self.title = title
+        self.days = days
+    }
+}
+
+final class IndicatorPredictedResult: Content {
+    static let schema = "IndicatorPredictedResult"
+    
+    let indicator: [IndicatorResult]
+    let value: Double
+    
+    init(indicator: [IndicatorResult], value: Double) {
+        self.indicator = indicator
+        self.value = value
     }
 }
 
 final class PredictionResult: Content {
     static let schema = "PredictionResult"
     
-    let daysEMA: Int
-    let daysSMA: Int
+//    let indicators: IndicatorPredictedResult
+    let comparable: Security
+    let date: Date
+    let dateAsString: String
     let dataSize: Int
+    let indicators: [IndicatorResult]
     let value: Double
+    let predictionTime: Double
     
-    init(dataSize: Int, daysEMA: Int, daysSMA: Int, value: Double) {
-        self.dataSize = dataSize
-        self.daysEMA = daysEMA
-        self.daysSMA = daysSMA
+    init(comparable: Security,
+         dataSize: Int,
+         indicator1: Indicators.Variant,
+         indicator2: Indicators.Variant,
+         days1: Int,
+         days2: Int,
+         value: Double,
+         time: Double) {
+        
+        self.indicators = [ IndicatorResult.init(title: "\(indicator1)", days: days1), IndicatorResult.init(title: "\(indicator2)", days: days2) ]
         self.value = value
+        self.date = comparable.date
+        self.dateAsString = comparable.dateAsString
+        self.dataSize = dataSize
+        self.predictionTime = time
+        self.comparable = comparable
     }
 }

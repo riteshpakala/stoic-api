@@ -1,10 +1,3 @@
-//
-//  TonalService.Indicators.Basic.swift
-//  * stoic
-//
-//  Created by Ritesh Pakala on 1/5/21.
-//
-
 import Foundation
 
 extension Indicators {
@@ -20,7 +13,7 @@ extension Indicators {
         }
         
         var change: Double {
-            (paired.base.value - paired.previous.value) / paired.previous.value
+            return (paired.base.value - paired.previous.value) / paired.previous.value
         }
         
         var volMomentum: Double {

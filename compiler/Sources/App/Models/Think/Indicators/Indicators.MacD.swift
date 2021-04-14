@@ -1,27 +1,28 @@
-//
-//  TonalService.Indicators.Stochastics.swift
-//  * stoic
-//
-//  Created by Ritesh Pakala on 1/12/21.
-//
-
 import Foundation
 
 extension Indicators {
-    public func macD(context: Context = .close) -> Double {
-        let ema12 = ema(12, context: context)
-        let ema26 = ema(26, context: context)
+    public func macD(_ days: Int = 12, context: Context = .close) -> Double {
+        let ema12 = ema(days, context: context) // 12
+        let ema26 = ema(days + 14, context: context) // 24
         
 //        print("{TEST} \(self.security.date) - ema12: \(ema12) // ema26: \(ema26)")
         return ema12 - ema26
+    }
+    
+    public func macDAverage(_ days: Int = 12, context: Context = .close) -> Double {
+        let ema12 = ema(days, context: context) // 12
+        let ema26 = ema(days + 14, context: context) // 24
+        
+//        print("{TEST} \(self.security.date) - ema12: \(ema12) // ema26: \(ema26)")
+        return (ema12 - ema26) / ema12
     }
     
     public func macDPrevious(context: Context = .close) -> Double {
         MacD.init([security] + history, quote: quote, context: context).values.macDs.first ?? 0.0
     }
     
-    public func macDSignal(context: Context = .close) -> Double {
-        MacD.init([security] + history, quote: quote, context: context).values.macDSignals.first ?? 0.0
+    public func macDSignal(_ days: Int = 9, context: Context = .close) -> Double {
+        MacD.init([security] + history, quote: quote, days: days, context: context).values.macDSignals.first ?? 0.0
     }
     
     public func macDPreviousSignal(context: Context = .close) -> Double {
@@ -108,8 +109,8 @@ extension Indicators {
         }
         
         let values: Value
-        public init(_ history: [Security], quote: [Security], context: Context) {
-            self.values = MacD.calculate(history, quote: quote, context: context)
+        public init(_ history: [Security], quote: [Security], days: Int = 9, context: Context) {
+            self.values = MacD.calculate(history, quote: quote, context: context, signal: days)
         }
     }
 }

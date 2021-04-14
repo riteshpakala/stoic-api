@@ -1,13 +1,48 @@
-//
-//  TonalService.Indicators.Stochastics.swift
-//  * stoic
-//
-//  Created by Ritesh Pakala on 1/12/21.
-//
-
 import Foundation
 
 extension Indicators {
+    public enum Variant {
+        case smawa
+        case emawa
+        case macd
+        case macdsignal
+        case volchange
+        case stochd
+        case stochk
+        case volatility
+        case momentum
+        case change
+        case vwa
+        
+        func compute(_ ind: Indicators, context: Indicators.Context, days: Int) -> Double {
+            switch self {
+            case .smawa:
+                return ind.smaWA(days, context: context)
+            case .emawa:
+                return ind.emaWA(days, context: context)
+            case .macd:
+                return ind.macDAverage(days, context: context)
+            case .macdsignal:
+                return ind.macDSignal(days, context: context)
+            case .volchange:
+                return ind.avgVolChange(days)
+            case .stochd:
+                return ind.stochastic.values.percentDs.first ?? 0.0
+            case .stochk:
+                return ind.stochastic.values.percentKs.first ?? 0.0
+            case .volatility:
+                return ind.avgChange(days) + 1
+            case .momentum:
+                return ind.avgMomentum(days) + 1
+            case .change:
+                return ind.basePair.volatility.change
+            case .vwa:
+                return ind.vwa()
+            
+            }
+        }
+    }
+    
     // Indicators
     var stochastic: Stochastics {
         .init([security] + history)
