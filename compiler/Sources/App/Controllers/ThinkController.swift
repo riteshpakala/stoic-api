@@ -74,9 +74,14 @@ struct ThinkController: RouteCollection {
             
             var predictions: [PredictionResult] = []
             
+            var completed: [[Indicators.Variant]] = []
             for variant1 in indicators {
                 
                 for variant2 in indicators {
+                    if (completed.contains(where: { $0.contains(variant1) && $0.contains(variant1) })) {
+                        continue
+                    }
+                    completed.append([variant1, variant2])
                 
                     let pred = generate(fromQuote: securities,
                                           dataSize: dataSize,
