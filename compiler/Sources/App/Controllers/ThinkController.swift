@@ -73,23 +73,33 @@ struct ThinkController: RouteCollection {
             let dataSize = Int.random(in: minDays...Defaults.trainingMaxDays)
             
             var predictions: [PredictionResult] = []
-            var lastPred: Double = 0.0
+            
             for variant1 in indicators {
                 
-                let pred = generate(fromQuote: securities,
-                                      dataSize: dataSize,
-                                      indicatorDays: minDays...maxDays,
-                                      indicator1: variant1,
-                                      indicator2: .smawa)
-                predictions.append(pred)
+                for variant2 in indicators {
                 
-                lastPred = pred.value
+                    let pred = generate(fromQuote: securities,
+                                          dataSize: dataSize,
+                                          indicatorDays: minDays...maxDays,
+                                          indicator1: variant1,
+                                          indicator2: variant2)
+                        
+                    predictions.append(pred)
+                    
+                    
+                    //add to flatten
+                    let predTests: [IndicatorPredictedResult] = pred.indicators.map{ .init(indicator: [.init(title: "\($0.title)", days: $0.days)], value: pred.value) }
+                    
+                    let predDefault: [IndicatorPredictedResult] = Defaults.indicators.map{ .init(indicator: [.init(title: "\($0)", days: dataSize)], value: pred.value) }
+                    
+                    //defaults
+                    predictionsFlattened.append(contentsOf: predTests+predDefault)
+                    
+                }
             
             }
             
-            let predDefault: [IndicatorPredictedResult] = Defaults.indicators.map{ .init(indicator: [.init(title: "\($0)", days: dataSize)], value: lastPred) }
-            //defaults
-            predictionsFlattened.append(contentsOf: predDefault)
+            
             
             result.append(.init(predictions: predictions, dataSize: dataSize))
         }
