@@ -68,7 +68,9 @@ struct ThinkController: RouteCollection {
         
         var result: [SecurityPredictionResult] = []
         var predictionsFlattened: [IndicatorPredictedResult] = []
-        for iter in 0..<9 {
+        
+        // 1. prediction for each iteration, for each combination of option indicators
+        for _ in 0..<9 {
 //            let range = minDays...maxDays
             let dataSize = Int.random(in: minDays...Defaults.trainingMaxDays)
             
@@ -78,7 +80,7 @@ struct ThinkController: RouteCollection {
             for variant1 in indicators {
                 
                 for variant2 in indicators {
-                    if (completed.contains(where: { $0.contains(variant1) && $0.contains(variant1) })) {
+                    if (completed.contains(where: { $0 == [variant1, variant2] || $0 == [variant2, variant1] })) {
                         continue
                     }
                     completed.append([variant1, variant2])
@@ -109,33 +111,48 @@ struct ThinkController: RouteCollection {
             result.append(.init(predictions: predictions, dataSize: dataSize))
         }
         
-        var errorPages: [[NodePath]] = []
-        var nodePages: [[Node]] = []
-        var daysPages: [[String: Int]] = []
-        var dataSizes: [Int] = []
+        // 2. Paginate data into readable JSON for front-end ease in manipulation
+        var errorPages: [[NodePath]] = []//each iteration, and paths with errors of each optional indicator path
+        var nodePages: [[Node]] = []//The full list of node paths possible for diagram draws
+        var daysPages: [[String: Int]] = []//The days used per indicator including defaults
+        var dataSizes: [Int] = []//The size of the data (training days)
         for item in result {
             var nodes: [Node] = []
             var errors: [NodePath] = []
             var days: [String: Int] = [:]
             for subItem in item.predictions {
+                var errorNodes: [Node] = []
+                
+                
+                var lastError: Double = 0.0
                 for indicator in subItem.indicators {
+                    
                     let error = (subItem.value - subItem.comparable.value(forContext: .close)) / subItem.comparable.value(forContext: .close)
                     
                     let nodesDefault: [Node] = Defaults.indicators.map{ .init(source: "\($0)", target: indicator.title) }
                     
-                    nodes.append(contentsOf: nodesDefault)
+                    lastError = error
                     
-                    errors.append(.init(nodes: nodes, error: error))
+                    nodes.append(contentsOf: nodesDefault)
+                    errorNodes.append(contentsOf: nodesDefault)
                     
                     days[indicator.title] = indicator.days
                 }
+                
+                Defaults.indicators.forEach { dItem in
+                    days["\(dItem)"] = item.dataSize
+                }
+                
+                errors.append(.init(nodes: errorNodes, error: lastError))
             }
+            
             dataSizes.append(item.dataSize)
             daysPages.append(days)
             errorPages.append(errors)
             nodePages.append(nodes)
         }
         
+        // 3. Metadata
         let colors: [String: NodeMeta] = [
             "\(Indicators.Variant.smawa)": .init(label: "SMA Weighted Avg.", color: "#EC6CFF"),
             "\(Indicators.Variant.emawa)": .init(label: "EMA Weighted Avg.", color: "#FFCD00"),

@@ -32,7 +32,7 @@ final class NodeError: Content {
     
     init(paths: [[NodePath]]) {
         self.paths = paths
-        self.bestPaths = paths.map { i in i.filter({ j in abs(j.error) == abs(i.sorted(by: { $0.error < $1.error }).first!.error) }) }
+        self.bestPaths = paths.map { i in [ i.filter({ j in abs(j.error) == abs(i.sorted(by: { abs($0.error) < abs($1.error) }).first!.error) }).first! ] }
         let flattened = Array(paths.flatMap { $0 })
         let smallest = flattened.map {  abs($0.error) }.min() ?? 100000
         let actual = flattened.first(where: { $0.error == smallest })?.error ?? 0.0
