@@ -94,10 +94,11 @@ struct ThinkController: RouteCollection {
                     predictions.append(pred)
                     
                     
+                    let flattenID: String = UUID().uuidString
                     //add to flatten
-                    let predTests: [IndicatorPredictedResult] = pred.indicators.map{ .init(indicator: [.init(title: "\($0.title)", days: $0.days)], value: pred.value) }
+                    let predTests: [IndicatorPredictedResult] = pred.indicators.map{ .init(indicator: [.init(title: "\($0.title)", days: $0.days)], value: pred.value, id: flattenID) }
                     
-                    let predDefault: [IndicatorPredictedResult] = Defaults.indicators.map{ .init(indicator: [.init(title: "\($0)", days: dataSize)], value: pred.value) }
+                    let predDefault: [IndicatorPredictedResult] = Defaults.indicators.map{ .init(indicator: [.init(title: "\($0)", days: dataSize)], value: pred.value, id: flattenID) }
                     
                     //defaults
                     predictionsFlattened.append(contentsOf: predTests+predDefault)

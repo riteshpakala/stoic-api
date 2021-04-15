@@ -92,10 +92,12 @@ final class IndicatorPredictedResult: Content {
     
     let indicator: [IndicatorResult]
     let value: Double
+    let id: String
     
-    init(indicator: [IndicatorResult], value: Double) {
+    init(indicator: [IndicatorResult], value: Double, id: String = UUID().uuidString) {
         self.indicator = indicator
         self.value = value
+        self.id = id
     }
 }
 
