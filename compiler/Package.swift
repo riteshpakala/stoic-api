@@ -23,6 +23,7 @@ let package = Package(
                 .product(name: "Vapor", package: "vapor"),
                 .product(name: "JWTKit", package: "jwt-kit"),
                 .product(name: "GoogleCloudKit", package: "google-cloud-kit"),
+                "MarqueKitObjC"
             ],
             swiftSettings: [
                 // Enable better optimizations when building in Release configuration. Despite the use of
@@ -31,6 +32,12 @@ let package = Package(
                 .unsafeFlags(["-cross-module-optimization"], .when(configuration: .release))
             ]
         ),
+        .target(
+            name: "MarqueKitObjC",
+            path: "Sources",
+            exclude: [],
+            sources: ["MarqueKitObjC", "ISSteganographer.m"],
+            publicHeadersPath: "MarqueKitObjC"),
         .target(name: "Run", dependencies: [.target(name: "App")]),
         .testTarget(name: "AppTests", dependencies: [
             .target(name: "App"),

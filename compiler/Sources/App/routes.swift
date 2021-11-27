@@ -8,4 +8,5 @@ func routes(_ app: Application) throws {
     }
 
     try app.register(collection: ThinkController(loopGroup: app.eventLoopGroup))
+    try app.register(collection: MarqueController(loopGroup: app.eventLoopGroup))
 }
