@@ -12,7 +12,8 @@ let package = Package(
         .package(url: "https://github.com/vapor/fluent.git", from: "4.0.0"),
         .package(url: "https://github.com/vapor/fluent-sqlite-driver.git", from: "4.0.0"),
         .package(url: "https://github.com/vapor/jwt-kit.git", from: "4.0.0"),
-        .package(url: "https://github.com/vapor-community/google-cloud-kit.git", from: "1.0.0-alpha.1")
+        .package(url: "https://github.com/vapor-community/google-cloud-kit.git", from: "1.0.0-alpha.1"),
+        .package(url: "https://github.com/PureSwift/Silica.git", .branch("master"))
     ],
     targets: [
         .target(
@@ -22,8 +23,7 @@ let package = Package(
                 .product(name: "FluentSQLiteDriver", package: "fluent-sqlite-driver"),
                 .product(name: "Vapor", package: "vapor"),
                 .product(name: "JWTKit", package: "jwt-kit"),
-                .product(name: "GoogleCloudKit", package: "google-cloud-kit"),
-                "MarqueKitObjC"
+                .product(name: "GoogleCloudKit", package: "google-cloud-kit")
             ],
             swiftSettings: [
                 // Enable better optimizations when building in Release configuration. Despite the use of
@@ -32,12 +32,6 @@ let package = Package(
                 .unsafeFlags(["-cross-module-optimization"], .when(configuration: .release))
             ]
         ),
-        .target(
-            name: "MarqueKitObjC",
-            path: "Sources",
-            exclude: [],
-            sources: ["MarqueKitObjC", "ISSteganographer.m"],
-            publicHeadersPath: "MarqueKitObjC"),
         .target(name: "Run", dependencies: [.target(name: "App")]),
         .testTarget(name: "AppTests", dependencies: [
             .target(name: "App"),

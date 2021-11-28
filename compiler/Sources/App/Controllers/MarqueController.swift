@@ -11,8 +11,6 @@ import Vapor
 import Core
 import Storage
 import Datastore
-import MarqueKitObjC
-import AppKit
 
 struct MarqueController: RouteCollection {
     let loopGroup: EventLoopGroup
@@ -27,7 +25,11 @@ struct MarqueController: RouteCollection {
 //        todos.get(use: index)
         
         todos.group("engrave") { todo in
-            todo.on(.POST, body: .collect(maxSize: 500000), use: engrave)
+            todo.on(.POST, body: .collect(maxSize: 800000), use: engrave)
+        }
+        
+        todos.group("process") { todo in
+            todo.on(.POST, body: .collect(maxSize: 800000), use: process)
         }
     }
     
@@ -35,40 +37,21 @@ struct MarqueController: RouteCollection {
         let promise = loopGroup.next().makePromise(of: EngravingResult.self)
         let contentType = req.headers["Content-Type"]
         do {
-            
+            let encoder = StegoEncoder()
+            let decoder = StegoDecoder()
             let status = try req.content.decode(Engraving.self)
             
-            if let image = NSImage.init(data: status.photo) {
-                
-                ISSteganographer.hideData(status.address, withImage: image) { (image, error) in
-                    
-                    if let imageCheck = image {
-                        print("image created")
-                        
-                        ISSteganographer.data(fromImage: imageCheck) { (data, error) in
-                            if let data = data {
-                                if let encryptedMessage = NSString.init(data: data, encoding: String.Encoding.utf8.rawValue) {
-                                   print(encryptedMessage)
-                                    promise.completeWith(.init(catching: {
-                                        EngravingResult.init(output: "success")
-                                    }))
-                                }
-                            } else {
-                                print("failed to decode")
-                                print(error?.localizedDescription)
-                                promise.completeWith(.init(catching: {
-                                    EngravingResult.init(output: "fail")
-                                }))
-                            }
-                        }
-                    } else {
-                        print(error?.localizedDescription)
-                        promise.completeWith(.init(catching: {
-                            EngravingResult.init(output: "fail")
-                        }))
-                    }
-                }
+            let array = status.photo.toArray(type: UInt32.self)
+            
+            let newArray = try encoder.hide(string: status.message, in: array, size: array.count)
+            
+            guard let _ = try decoder.search(in: newArray, size: newArray.count) else {
+                throw StegoError.invalidImage
             }
+            
+            promise.completeWith(.init(catching: {
+                EngravingResult.init(output: "fail", data: newArray)
+            }))
         } catch let error {
             print(error.localizedDescription)
             promise.completeWith(.init(catching: {
@@ -77,5 +60,51 @@ struct MarqueController: RouteCollection {
         }
         
         return promise.futureResult
+    }
+    
+    func process(req: Request) throws -> EventLoopFuture<ProcessResult> {
+        let promise = loopGroup.next().makePromise(of: ProcessResult.self)
+        let contentType = req.headers["Content-Type"]
+        do {
+            
+            let decoder = StegoDecoder()
+            let status = try req.content.decode(Process.self)
+            
+            let array = status.photo.toArray(type: UInt32.self)
+            
+            guard let string = try decoder.search(in: array, size: array.count) else {
+                throw StegoError.invalidImage
+            }
+            
+            guard String(string.prefix(DefaultsMarque.dataPrefix.count)) == DefaultsMarque.dataPrefix
+              && String(string.suffix(DefaultsMarque.dataSuffix.count)) == DefaultsMarque.dataSuffix else {
+                throw StegoError.invalidImage
+            }
+            
+            let endIndex = string.index(string.endIndex, offsetBy: -DefaultsMarque.dataSuffix.count)
+            let startIndex = string.index(string.startIndex, offsetBy: DefaultsMarque.dataPrefix.count)
+
+            guard let data = Data(base64Encoded: String(string[startIndex..<endIndex])) else {
+                throw StegoError.invalidImage
+            }
+            
+            promise.completeWith(.init(catching: {
+                ProcessResult.init(output: String.init(data: data, encoding: .utf8) ?? "fail")
+            }))
+        } catch let error {
+            print(error.localizedDescription)
+            promise.completeWith(.init(catching: {
+                ProcessResult.init(output: "fail")
+            }))
+        }
+        
+        return promise.futureResult
+    }
+}
+extension Data {
+    func toArray<T>(type: T.Type) -> [T] where T: ExpressibleByIntegerLiteral {
+        Array(unsafeUninitializedCapacity: self.count/MemoryLayout<T>.stride) { (buffer, i) in
+            i = copyBytes(to: buffer) / MemoryLayout<T>.stride
+        }
     }
 }
