@@ -13,7 +13,6 @@ let package = Package(
         .package(url: "https://github.com/vapor/fluent-sqlite-driver.git", from: "4.0.0"),
         .package(url: "https://github.com/vapor/jwt-kit.git", from: "4.0.0"),
         .package(url: "https://github.com/vapor-community/google-cloud-kit.git", from: "1.0.0-alpha.1"),
-        .package(url: "https://github.com/PureSwift/Silica.git", .branch("master"))
     ],
     targets: [
         .target(
